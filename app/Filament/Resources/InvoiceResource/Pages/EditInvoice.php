@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\InvoiceResource\Pages;
 
 use App\Filament\Resources\InvoiceResource;
+use Filament\Notifications\Notification;
 use Filament\Pages\Actions;
 use Filament\Resources\Pages\EditRecord;
 
@@ -13,7 +14,18 @@ class EditInvoice extends EditRecord
     protected function getActions(): array
     {
         return [
+            Actions\Action::make('Send')->action('sendInvoiceEmail'),
             Actions\DeleteAction::make(),
         ];
+    }
+
+    public function sendInvoiceEmail()
+    {
+        $this->record->sendInvoiceEmail();
+
+        Notification::make()
+                    ->title('Email Sent')
+                    ->success()
+                    ->send();
     }
 }

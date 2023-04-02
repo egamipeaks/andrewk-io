@@ -63,6 +63,7 @@ class InvoiceResource extends Resource
     {
         return [
             RelationManagers\InvoiceLinesRelationManager::class,
+            RelationManagers\InvoiceEmailSendsRelationManager::class,
         ];
     }
 

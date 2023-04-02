@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\Mail\InvoiceEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Mail;
 
 class Invoice extends Model
 {
@@ -44,5 +46,14 @@ class Invoice extends Model
     public function emailSends(): HasMany
     {
         return $this->hasMany(InvoiceEmailSend::class);
+    }
+
+    public function sendInvoiceEmail()
+    {
+        Mail::to($this->client->email)->send(new InvoiceEmail($this));
+
+        $this->emailSends()->create([
+            'sent_at' => now(),
+        ]);
     }
 }
