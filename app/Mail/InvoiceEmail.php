@@ -37,7 +37,11 @@ class InvoiceEmail extends Mailable
     {
         return new Envelope(
             from: new Address('andrew.krzynowek@gmail.com', 'Andrew Krzynowek'),
-            subject: 'Invoice from Andrew Krzynowek due on ' . $this->invoice->due_date->format('m/d/Y'),
+            subject: sprintf(
+                'Invoice (#%d) from Andrew Krzynowek due on %s',
+                $this->invoice->id,
+                $this->invoice->due_date->format('F jS, Y')
+            ),
         );
     }
 

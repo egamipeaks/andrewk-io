@@ -41,6 +41,7 @@ class InvoiceResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('client.name')
                     ->label('Client'),
+                Tables\Columns\TextColumn::make('id'),
                 Tables\Columns\TextColumn::make('total')
                     ->formatStateUsing(fn (string $state): string => "$" . number_format($state, 2)),
                 Tables\Columns\TextColumn::make('due_date')

@@ -1,6 +1,7 @@
 <x-mail::message>
 # You have received an invoice.
 
+Invoice: #{{ $invoice->id }}<br>
 Billed To: {{ $invoice->client->name }}<br>
 Due Date: {{ $invoice->due_date->formatLocalized('%B %e, %Y') }}<br>
 Total: {{ $invoice->formattedTotal() }}<br>
