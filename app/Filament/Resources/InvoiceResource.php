@@ -38,7 +38,7 @@ class InvoiceResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->sortTable('id', 'desc')
+            // ->sortBy('id', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('client.name')
                     ->label('Client'),
