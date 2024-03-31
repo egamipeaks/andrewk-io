@@ -38,7 +38,6 @@ class InvoiceResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            // ->sortBy('id', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('client.name')
                     ->label('Client'),
@@ -76,5 +75,10 @@ class InvoiceResource extends Resource
             'create' => Pages\CreateInvoice::route('/create'),
             'edit' => Pages\EditInvoice::route('/{record}/edit'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->orderBy('id', 'desc');
     }
 }
