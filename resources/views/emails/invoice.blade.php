@@ -3,7 +3,7 @@
 
 Invoice: #{{ $invoice->id }}<br>
 Billed To: {{ $invoice->client->name }}<br>
-Due Date: {{ $invoice->due_date->formatLocalized('%B %e, %Y') }}<br>
+Due Date: {{ $invoice->due_date->format('m/d/Y') }}<br>
 Total: {{ $invoice->formattedTotal() }}<br>
 
 <x-mail::table >
