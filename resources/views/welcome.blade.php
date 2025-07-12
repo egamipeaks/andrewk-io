@@ -35,18 +35,18 @@
                 </div>
             </div>
 
-{{--            <div class="space-y-6">--}}
-{{--                <h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100">Recent Posts</h2>--}}
-{{--                <div class="space-y-4">--}}
-{{--                    <article class="group">--}}
-{{--                        <a href="/blog/building-scalable-laravel-apps" class="block p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">--}}
-{{--                            <h3 class="font-medium text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400">Title</h3>--}}
-{{--                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Description goes here</p>--}}
-{{--                            <time class="text-xs text-gray-500 dark:text-gray-500 mt-2 block">Date</time>--}}
-{{--                        </a>--}}
-{{--                    </article>--}}
-{{--                </div>--}}
-{{--            </div>--}}
+            <div class="space-y-6">
+                <h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100">Recent Posts</h2>
+                <div class="space-y-4">
+                    <article class="group">
+                        <a href="/blog/laravel-wordpress-migration" class="block p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                            <h3 class="font-medium text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400">Running Laravel and WordPress Together</h3>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">How I Migrated a Monolith One Route at a Time</p>
+                            <time class="text-xs text-gray-500 dark:text-gray-500 mt-2 block">July 12, 2025</time>
+                        </a>
+                    </article>
+                </div>
+            </div>
 
             <div class="flex justify-center space-x-6 pt-8">
                 <a href="https://github.com/egamipeaks" target="_blank" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
