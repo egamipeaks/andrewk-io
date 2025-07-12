@@ -15,8 +15,8 @@
         <nav class="py-6 px-4">
             <div class="max-w-2xl mx-auto flex justify-between items-center">
                 <div class="flex space-x-6">
-{{--                    <a href="/" class="font-medium text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Home</a>--}}
-{{--                    <a href="/blog" class="font-medium text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Blog</a>--}}
+                    <a href="/" class="font-medium text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Home</a>
+                    <a href="/blog/laravel-wordpress-migration" class="font-medium text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Blog</a>
 {{--                    <a href="/links" class="font-medium text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Links</a>--}}
                 </div>
                 <button
