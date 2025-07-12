@@ -5,10 +5,8 @@ namespace App\Filament\Resources\InvoiceResource\RelationManagers;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables\Table;
 use Filament\Tables;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Tables\Table;
 
 class InvoiceLinesRelationManager extends RelationManager
 {
@@ -26,7 +24,7 @@ class InvoiceLinesRelationManager extends RelationManager
                 Forms\Components\TextInput::make('hourly_rate')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('hours')
+                Forms\Components\TextInput::make('hours'),
             ]);
     }
 
