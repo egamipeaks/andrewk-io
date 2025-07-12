@@ -5,9 +5,9 @@
         <div class="space-y-8">
             <div class="space-y-6">
                 <div class="flex justify-center mb-8">
-                    <img src="{{ asset('images/avatar.jpeg') }}" alt="Andrew Krzynowek" class="w-32 h-32 rounded-full object-cover object-top border-4 border-gray-200 dark:border-gray-700 shadow-lg">
+                    <img src="{{ asset('images/avatar_400w.jpg') }}" alt="Andrew Krzynowek" class="w-32 h-32 rounded-full object-cover object-top border-4 border-gray-200 dark:border-gray-700 shadow-lg">
                 </div>
-                
+
                 <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100">
                     Hi! I'm Andrew.
                 </h1>
