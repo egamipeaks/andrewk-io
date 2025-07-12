@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "73d43aa470c10242c65b66c4ade8f34d",
+    "content-hash": "e937f6fafcdf42d1ef71c6ec3cdec11e",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -1019,16 +1019,16 @@
         },
         {
             "name": "egamipeaks/pizzazz",
-            "version": "0.0.3",
+            "version": "0.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/egamipeaks/pizzazz.git",
-                "reference": "4538991afa69237cc3f1a4220600b054da615a6b"
+                "reference": "d7192437bfff922294254a62d2b31ed309955023"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/egamipeaks/pizzazz/zipball/4538991afa69237cc3f1a4220600b054da615a6b",
-                "reference": "4538991afa69237cc3f1a4220600b054da615a6b",
+                "url": "https://api.github.com/repos/egamipeaks/pizzazz/zipball/d7192437bfff922294254a62d2b31ed309955023",
+                "reference": "d7192437bfff922294254a62d2b31ed309955023",
                 "shasum": ""
             },
             "require": {
@@ -1086,7 +1086,7 @@
             ],
             "support": {
                 "issues": "https://github.com/egamipeaks/pizzazz/issues",
-                "source": "https://github.com/egamipeaks/pizzazz/tree/0.0.3"
+                "source": "https://github.com/egamipeaks/pizzazz/tree/0.0.4"
             },
             "funding": [
                 {
@@ -1094,7 +1094,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-07-12T21:01:04+00:00"
+            "time": "2025-07-12T21:06:26+00:00"
         },
         {
             "name": "egulias/email-validator",
