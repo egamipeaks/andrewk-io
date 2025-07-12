@@ -8,10 +8,9 @@ use App\Models\Invoice;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables\Table;
 use Filament\Tables;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class InvoiceResource extends Resource
 {
@@ -43,11 +42,11 @@ class InvoiceResource extends Resource
                     ->label('Client'),
                 Tables\Columns\TextColumn::make('id'),
                 Tables\Columns\TextColumn::make('total')
-                    ->formatStateUsing(fn (string $state): string => "$" . number_format($state, 2)),
+                    ->formatStateUsing(fn (string $state): string => '$'.number_format($state, 2)),
                 Tables\Columns\TextColumn::make('due_date')
                     ->date(),
                 Tables\Columns\IconColumn::make('paid')
-                     ->boolean(),
+                    ->boolean(),
             ])
             ->filters([
                 //

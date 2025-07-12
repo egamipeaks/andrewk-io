@@ -40,6 +40,6 @@ class InvoiceLine extends Model
 
     public function formattedSubTotal(): string
     {
-        return '$' . number_format($this->subtotal, 2);
+        return '$'.number_format($this->subtotal, 2);
     }
 }

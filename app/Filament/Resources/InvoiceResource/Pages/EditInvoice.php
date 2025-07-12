@@ -24,8 +24,8 @@ class EditInvoice extends EditRecord
         $this->record->sendInvoiceEmail();
 
         Notification::make()
-                    ->title('Email Sent')
-                    ->success()
-                    ->send();
+            ->title('Email Sent')
+            ->success()
+            ->send();
     }
 }

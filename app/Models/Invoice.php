@@ -40,7 +40,7 @@ class Invoice extends Model
 
     public function formattedTotal(): string
     {
-        return '$' . number_format($this->total, 2);
+        return '$'.number_format($this->total, 2);
     }
 
     public function emailSends(): HasMany

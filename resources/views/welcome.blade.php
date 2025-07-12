@@ -4,41 +4,49 @@
     <div class="max-w-2xl mx-auto py-12">
         <div class="space-y-8">
             <div class="space-y-6">
+                <div class="flex justify-center mb-8">
+                    <img src="{{ asset('images/avatar.jpeg') }}" alt="Andrew Krzynowek" class="w-32 h-32 rounded-full object-cover object-top border-4 border-gray-200 dark:border-gray-700 shadow-lg">
+                </div>
+                
                 <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100">
-                    Hi! I'm Andrew. 👋
+                    Hi! I'm Andrew.
                 </h1>
 
-                <div class="space-y-4 text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
+                <div class="space-y-4 text-md text-gray-600 dark:text-gray-300 leading-relaxed">
                     <p>
-                        I live in Sugar Land, TX with my wife and 2 kids.
+                        I’m a freelance developer and consulting tech lead based in Sugar Land, TX. I help companies build scalable Laravel applications.
                     </p>
 
                     <p>
-                        I've been building things on the web for almost two decades. My main role right now is consulting as the Lead Developer for an <a href="https://www.craftsy.com/" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">E-Commerce video streaming platform</a> with millions of customers.
+                        Right now, I serve as a fractional Lead Developer for an <a href="https://www.tnmarketing.com/" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">e-commerce video streaming platform</a> with millions of users, where I’ve led the migration from WooCommerce to Laravel.
                     </p>
 
                     <p>
-                        I also make <a href="https://www.youtube.com/@egamipeaks" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">music</a>.
+                        My specialties include backend architecture, clean code, team mentorship, and fractional leadership for agencies and small businesses.
                     </p>
 
                     <p>
-                        You can reach out to me on <a href="https://www.linkedin.com/in/andrewkrzynowek/" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">LinkedIn</a>.
+                        I also make <a href="https://open.spotify.com/artist/1VOaizHACRU5vgCQr6RCid?si=xtP-l1uyT9qFE-ti3P1BfQ" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">music</a> under the name Egami Peaks.
+                    </p>
+
+                    <p>
+                        You can reach out to me on <a href="https://www.linkedin.com/in/andrewkrzynowek/" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">LinkedIn</a> or check out my <a href="https://github.com/egamipeaks" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">GitHub</a>.
                     </p>
                 </div>
             </div>
 
-            <div class="space-y-6">
-                <h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100">Recent Posts</h2>
-                <div class="space-y-4">
-                    <article class="group">
-                        <a href="/blog/building-scalable-laravel-apps" class="block p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                            <h3 class="font-medium text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400">Title</h3>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Description goes here</p>
-                            <time class="text-xs text-gray-500 dark:text-gray-500 mt-2 block">Date</time>
-                        </a>
-                    </article>
-                </div>
-            </div>
+{{--            <div class="space-y-6">--}}
+{{--                <h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100">Recent Posts</h2>--}}
+{{--                <div class="space-y-4">--}}
+{{--                    <article class="group">--}}
+{{--                        <a href="/blog/building-scalable-laravel-apps" class="block p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">--}}
+{{--                            <h3 class="font-medium text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400">Title</h3>--}}
+{{--                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Description goes here</p>--}}
+{{--                            <time class="text-xs text-gray-500 dark:text-gray-500 mt-2 block">Date</time>--}}
+{{--                        </a>--}}
+{{--                    </article>--}}
+{{--                </div>--}}
+{{--            </div>--}}
 
             <div class="flex justify-center space-x-6 pt-8">
                 <a href="https://github.com/egamipeaks" target="_blank" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
