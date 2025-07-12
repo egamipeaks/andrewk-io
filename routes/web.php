@@ -19,3 +19,7 @@ Route::get('/', function () {
 });
 
 Route::get('/blog/{slug}', [BlogController::class, 'show']);
+
+Route::get('/work', function () {
+    return view('work');
+});
