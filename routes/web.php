@@ -14,12 +14,14 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::middleware('page-cache')->group(function () {
+    Route::get('/', function () {
+        return view('welcome');
+    });
 
-Route::get('/blog/{slug}', [BlogController::class, 'show']);
+    Route::get('/blog/{slug}', [BlogController::class, 'show']);
 
-Route::get('/work', function () {
-    return view('work');
+    Route::get('/work', function () {
+        return view('work');
+    });
 });
