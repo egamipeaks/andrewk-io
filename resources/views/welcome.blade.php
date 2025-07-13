@@ -38,12 +38,12 @@
                     I'm available for freelance or part-time contract work. Here’s how I can help:
                 </p>
 
-                <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300 text-md">
-                    <li><strong class="font-bold text-gray-900">WordPress to Laravel migrations</strong> — Move your legacy code into a modern framework.</li>
-                    <li><strong class="font-bold text-gray-900">Architecture and backend design</strong> — Scalable, testable, maintainable systems.</li>
-                    <li><strong class="font-bold text-gray-900">Refactoring legacy Laravel apps</strong> — Clean up codebases and improve performance.</li>
-                    <li><strong class="font-bold text-gray-900">Fractional Lead Developer roles</strong> — Team mentorship, technical leadership, and delivery oversight.</li>
-                    <li><strong class="font-bold text-gray-900">Package development & API integrations</strong> — Custom tools and Laravel service layers.</li>
+                <ul class="list-disc list-inside space-y-2 text-gray-600 dark:text-gray-400 text-md">
+                    <li><strong class="font-bold text-gray-900 dark:text-gray-100">WordPress to Laravel migrations</strong> — Move your legacy code into a modern framework.</li>
+                    <li><strong class="font-bold text-gray-900 dark:text-gray-100">Architecture and backend design</strong> — Scalable, testable, maintainable systems.</li>
+                    <li><strong class="font-bold text-gray-900 dark:text-gray-100">Refactoring legacy Laravel apps</strong> — Clean up codebases and improve performance.</li>
+                    <li><strong class="font-bold text-gray-900 dark:text-gray-100">Fractional Lead Developer roles</strong> — Team mentorship, technical leadership, and delivery oversight.</li>
+                    <li><strong class="font-bold text-gray-900 dark:text-gray-100">Package development & API integrations</strong> — Custom tools and Laravel service layers.</li>
                 </ul>
 
                 <p class="mt-6 text-lg text-gray-700 dark:text-gray-300">
