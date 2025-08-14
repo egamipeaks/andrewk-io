@@ -5,5 +5,5 @@ it('performs basic math correctly', function () {
 });
 
 it('can concatenate strings', function () {
-    expect('Hello' . ' ' . 'World')->toBe('Hello World');
+    expect('Hello'.' '.'World')->toBe('Hello World');
 });

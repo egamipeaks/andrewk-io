@@ -4,19 +4,16 @@ use App\Filament\Resources\ClientResource\Pages\CreateClient;
 use App\Filament\Resources\ClientResource\Pages\EditClient;
 use App\Filament\Resources\InvoiceResource\Pages\CreateInvoice;
 use App\Filament\Resources\InvoiceResource\Pages\EditInvoice;
-use App\Models\User;
 use App\Models\Client;
 use App\Models\Invoice;
+use App\Models\User;
 use Filament\Actions\DeleteAction;
 use Filament\Auth\Pages\Login;
-use Filament\Facades\Filament;
 use Livewire\Livewire;
-use App\Filament\Resources\ClientResource;
-use App\Filament\Resources\InvoiceResource;
+
 use function Pest\Laravel\actingAs;
-use function Pest\Laravel\get;
-use function Pest\Laravel\post;
 use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\get;
 
 beforeEach(function () {
     // Create an admin user with the correct email domain and verified email
