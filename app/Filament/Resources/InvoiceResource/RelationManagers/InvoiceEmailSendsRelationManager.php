@@ -3,8 +3,8 @@
 namespace App\Filament\Resources\InvoiceResource\RelationManagers;
 
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 
@@ -14,9 +14,9 @@ class InvoiceEmailSendsRelationManager extends RelationManager
 
     protected static ?string $recordTitleAttribute = 'sent_at';
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
+        return $schema
             ->schema([
                 Forms\Components\TextInput::make('sent_at')
                     ->required()
