@@ -23,5 +23,19 @@
     <include>
       <directory suffix=".php">./app</directory>
     </include>
+    <exclude>
+      <file>./app/Exceptions/Handler.php</file>
+      <file>./app/Console/Kernel.php</file>
+      <file>./app/Http/Kernel.php</file>
+
+        <!-- Laravel Native Middleware (boilerplate) -->
+      <directory suffix=".php">./app/Http/Middleware</directory>
+
+      <!-- All Service Providers (mostly boilerplate configuration) -->
+      <directory suffix=".php">./app/Providers</directory>
+
+      <!-- Filament Auto-generated RelationManagers (if unused) -->
+      <directory suffix=".php">./app/Filament/Resources/*/RelationManagers</directory>
+    </exclude>
   </source>
 </phpunit>

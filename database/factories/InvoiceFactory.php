@@ -19,9 +19,9 @@ class InvoiceFactory extends Factory
     {
         return [
             'client_id' => Client::factory(),
-            'paid' => $this->faker->boolean(30), // 30% chance of being paid
-            'due_date' => $this->faker->dateTimeBetween('now', '+60 days'),
-            'note' => $this->faker->optional()->sentence(),
+            'paid' => fake()->randomElement([0, 1]), // 50% chance of being paid
+            'due_date' => fake()->dateTimeBetween('now', '+60 days'),
+            'note' => fake()->optional()->sentence(),
         ];
     }
 }
