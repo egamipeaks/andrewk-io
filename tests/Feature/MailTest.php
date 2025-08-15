@@ -3,22 +3,21 @@
 use App\Mail\InvoiceEmail;
 use App\Models\Client;
 use App\Models\Invoice;
-use Illuminate\Support\Facades\Mail;
 
 it('can create invoice email with correct subject and recipient', function () {
     $client = Client::factory()->create([
         'email' => 'test@example.com',
     ]);
-    
+
     $invoice = Invoice::factory()->create([
         'client_id' => $client->id,
         'due_date' => now()->addDays(30),
     ]);
-    
+
     $mail = new InvoiceEmail($invoice);
-    
+
     expect($mail->invoice)->toBe($invoice);
-    
+
     $envelope = $mail->envelope();
     expect($envelope->subject)->toContain('Invoice (#'.$invoice->id.')');
     expect($envelope->subject)->toContain($invoice->due_date->format('F jS, Y'));
@@ -31,10 +30,10 @@ it('renders invoice email with markdown template', function () {
     $invoice = Invoice::factory()->create([
         'client_id' => $client->id,
     ]);
-    
+
     $mail = new InvoiceEmail($invoice);
     $content = $mail->content();
-    
+
     expect($content->markdown)->toBe('emails.invoice');
 });
 
@@ -43,8 +42,8 @@ it('has no attachments by default', function () {
     $invoice = Invoice::factory()->create([
         'client_id' => $client->id,
     ]);
-    
+
     $mail = new InvoiceEmail($invoice);
-    
+
     expect($mail->attachments())->toBeEmpty();
 });

@@ -18,7 +18,7 @@ class InvoiceLineFactory extends Factory
     public function definition(): array
     {
         $isHourly = fake()->randomElement([true, false]);
-        
+
         if ($isHourly) {
             return [
                 'invoice_id' => Invoice::factory(),
