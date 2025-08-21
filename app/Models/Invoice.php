@@ -56,4 +56,14 @@ class Invoice extends Model
             'sent_at' => now(),
         ]);
     }
+
+    public function sendTestEmail()
+    {
+        $adminEmail = config('mail.admin_email');
+        Mail::to($adminEmail)->send(new InvoiceEmail($this));
+
+        $this->emailSends()->create([
+            'sent_at' => now(),
+        ]);
+    }
 }
