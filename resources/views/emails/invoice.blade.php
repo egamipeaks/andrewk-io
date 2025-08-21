@@ -10,7 +10,7 @@ Total: {{ $invoice->formattedTotal() }}<br>
     | Description | Hours | Rate | Total |
     | ------------| ----- | ----- | ----- |
     @foreach ($invoice->invoiceLines as $line)
-        | {{ $line->description }} | {{ $line->hours }} | {{ $line->hourly_rate }} | {{ $line->formattedSubTotal() }} |
+        | {{ $line->description }} | {{ $line->hours ?? '-' }} | {{ $line->formattedHourlyRate() ?: '-' }} | {{ $line->formattedSubTotal() }} |
     @endforeach
 </x-mail::table>
 

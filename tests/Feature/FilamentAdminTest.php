@@ -78,6 +78,7 @@ it('can create a new client through Filament', function () {
         ->fillForm([
             'name' => 'Test Client',
             'email' => 'test@client.com',
+            'currency' => 'USD',
         ])
         ->call('create')
         ->assertHasNoFormErrors();
@@ -85,6 +86,7 @@ it('can create a new client through Filament', function () {
     assertDatabaseHas('clients', [
         'name' => 'Test Client',
         'email' => 'test@client.com',
+        'currency' => 'USD',
     ]);
 });
 
@@ -92,6 +94,7 @@ it('can edit an existing client', function () {
     $client = Client::factory()->create([
         'name' => 'Original Name',
         'email' => 'original@email.com',
+        'currency' => 'USD',
     ]);
 
     Livewire::actingAs($this->admin)
@@ -101,6 +104,7 @@ it('can edit an existing client', function () {
         ->fillForm([
             'name' => 'Updated Name',
             'email' => 'updated@email.com',
+            'currency' => 'CAD',
         ])
         ->call('save')
         ->assertHasNoFormErrors();
@@ -109,6 +113,7 @@ it('can edit an existing client', function () {
         'id' => $client->id,
         'name' => 'Updated Name',
         'email' => 'updated@email.com',
+        'currency' => 'CAD',
     ]);
 });
 

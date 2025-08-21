@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Currency;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -12,6 +13,15 @@ class Client extends Model
     protected $fillable = [
         'name',
         'email',
+        'currency',
+    ];
+
+    protected $casts = [
+        'currency' => Currency::class,
+    ];
+
+    protected $attributes = [
+        'currency' => 'USD',
     ];
 
     /**

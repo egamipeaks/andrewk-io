@@ -25,7 +25,9 @@ describe('Invoice Model', function () {
     });
 
     it('formats total with dollar sign and two decimals', function () {
-        $invoice = Invoice::factory()->create();
+        $invoice = Invoice::factory()->create([
+            'currency' => 'USD',
+        ]);
 
         InvoiceLine::factory()->create([
             'invoice_id' => $invoice->id,
@@ -160,7 +162,12 @@ describe('InvoiceLine Model', function () {
     });
 
     it('formats subtotal with dollar sign', function () {
+        $invoice = Invoice::factory()->create([
+            'currency' => 'USD',
+        ]);
+
         $invoiceLine = InvoiceLine::factory()->create([
+            'invoice_id' => $invoice->id,
             'amount' => 1234.5,
         ]);
 

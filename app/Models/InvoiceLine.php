@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Currency;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -40,6 +41,18 @@ class InvoiceLine extends Model
 
     public function formattedSubTotal(): string
     {
-        return '$'.number_format($this->subtotal, 2);
+        $currency = $this->invoice->currency ?? Currency::USD;
+
+        return $currency->format($this->subtotal);
+    }
+
+    public function formattedHourlyRate(): string
+    {
+        if ($this->hourly_rate === null) {
+            return '';
+        }
+        $currency = $this->invoice->currency ?? Currency::USD;
+
+        return $currency->format($this->hourly_rate);
     }
 }
