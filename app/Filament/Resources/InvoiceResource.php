@@ -27,7 +27,16 @@ class InvoiceResource extends Resource
             ->schema([
                 Forms\Components\Select::make('client_id')
                     ->relationship('client', 'name')
-                    ->required(),
+                    ->required()
+                    ->live()
+                    ->afterStateUpdated(function ($set, $state) {
+                        if ($state) {
+                            $client = \App\Models\Client::find($state);
+                            if ($client) {
+                                $set('currency', $client->currency->value);
+                            }
+                        }
+                    }),
                 Forms\Components\Select::make('currency')
                     ->options(Currency::class)
                     ->default(Currency::USD)

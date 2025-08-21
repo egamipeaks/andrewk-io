@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\Currency;
 use App\Filament\Resources\ClientResource\Pages;
 use App\Models\Client;
 use BackedEnum;
@@ -31,6 +32,10 @@ class ClientResource extends Resource
                     ->email()
                     ->required()
                     ->maxLength(255),
+                Forms\Components\Select::make('currency')
+                    ->options(Currency::class)
+                    ->default(Currency::USD)
+                    ->required(),
             ]);
     }
 
@@ -40,6 +45,13 @@ class ClientResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name'),
                 Tables\Columns\TextColumn::make('email'),
+                Tables\Columns\TextColumn::make('currency')
+                    ->badge()
+                    ->color(fn ($state) => match ($state?->value) {
+                        'USD' => 'success',
+                        'CAD' => 'info',
+                        default => 'gray',
+                    }),
             ])
             ->filters([
                 //
