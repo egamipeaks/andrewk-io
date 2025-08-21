@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Currency;
 use App\Mail\InvoiceEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,12 +16,18 @@ class Invoice extends Model
     protected $fillable = [
         'client_id',
         'paid',
+        'currency',
         'due_date',
         'note',
     ];
 
     protected $casts = [
         'due_date' => 'date',
+        'currency' => Currency::class,
+    ];
+
+    protected $attributes = [
+        'currency' => 'USD',
     ];
 
     public function client()
@@ -40,7 +47,9 @@ class Invoice extends Model
 
     public function formattedTotal(): string
     {
-        return '$'.number_format($this->total, 2);
+        $currency = $this->currency ?? Currency::USD;
+
+        return $currency->format($this->total);
     }
 
     public function emailSends(): HasMany
