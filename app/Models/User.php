@@ -47,4 +47,9 @@ class User extends Authenticatable implements FilamentUser
     {
         return str_ends_with($this->email, '@andrewk.io') && $this->hasVerifiedEmail();
     }
+
+    public function canPreviewInvoiceEmails(): bool
+    {
+        return str_ends_with($this->email, '@andrewk.io') && $this->hasVerifiedEmail();
+    }
 }

@@ -14,6 +14,11 @@ class EditInvoice extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('Preview Email')
+                ->action(fn () => redirect()->route('invoice.email.preview', $this->record))
+                ->color('warning')
+                ->icon('heroicon-o-eye')
+                ->openUrlInNewTab(),
             Actions\Action::make('Send')->action('sendInvoiceEmail'),
             Actions\Action::make('Send Test Email')
                 ->action('sendTestEmail')
