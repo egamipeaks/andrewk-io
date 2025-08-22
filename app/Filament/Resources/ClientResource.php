@@ -36,6 +36,12 @@ class ClientResource extends Resource
                     ->options(Currency::class)
                     ->default(Currency::USD)
                     ->required(),
+                Forms\Components\TextInput::make('hourly_rate')
+                    ->label('Hourly Rate')
+                    ->numeric()
+                    ->prefix('$')
+                    ->step(0.01)
+                    ->placeholder('150.00'),
             ]);
     }
 
@@ -52,6 +58,10 @@ class ClientResource extends Resource
                         'CAD' => 'info',
                         default => 'gray',
                     }),
+                Tables\Columns\TextColumn::make('hourly_rate')
+                    ->label('Hourly Rate')
+                    ->money()
+                    ->sortable(),
             ])
             ->filters([
                 //

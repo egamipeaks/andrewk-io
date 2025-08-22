@@ -72,7 +72,10 @@ class InvoiceResource extends Resource
                     ->boolean(),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('client')
+                    ->relationship('client', 'name')
+                    ->searchable()
+                    ->preload(),
             ])
             ->actions([
                 Actions\EditAction::make(),

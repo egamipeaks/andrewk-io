@@ -14,6 +14,7 @@ class Client extends Model
         'name',
         'email',
         'currency',
+        'hourly_rate',
     ];
 
     protected $casts = [

@@ -1,11 +1,11 @@
 # Andrew's Personal Website - Project Context
 
 ## Overview
-This is Andrew's personal website built with Laravel 11, featuring a blog, portfolio/work showcase, and an admin panel for client and invoice management using Filament.
+This is Andrew's personal website built with Laravel 12, featuring a blog, portfolio/work showcase, and an admin panel for client and invoice management using Filament.
 
 ## Tech Stack
-- **Backend**: Laravel 11 (PHP 8.2+)
-- **Admin Panel**: Filament 3.0
+- **Backend**: Laravel 12 (PHP 8.4.8)
+- **Admin Panel**: Filament 4.0
 - **Frontend**: Blade templates with Tailwind CSS
 - **Build Tools**: Vite
 - **Database**: MySQL/PostgreSQL (Laravel migrations)
@@ -14,6 +14,9 @@ This is Andrew's personal website built with Laravel 11, featuring a blog, portf
   - Pizzazz (page caching package)
   - Laravel Ray (debugging)
   - Laravel Sanctum (API authentication)
+  - Resend Laravel (email service provider)
+  - Laravel Boost (development tools)
+  - Doctrine DBAL (database abstraction layer)
 
 ## Project Structure
 ```
@@ -77,6 +80,7 @@ php artisan test
 - **invoice_email_sends**: Email send history
 
 ## Recent Updates
+- Upgraded to Laravel 12 and Pest v3
 - Fixed text visibility in dark mode on homepage
 - Updated pizzazz page caching configuration
 - Added page caching with Ray debugging integration
@@ -272,31 +276,35 @@ Forms\Components\Select::make('user_id')
 - If you receive an "Illuminate\Foundation\ViteException: Unable to locate file in Vite manifest" error, you can run `npm run build` or ask the user to run `npm run dev` or `composer run dev`.
 
 
-=== laravel/v11 rules ===
+=== laravel/v12 rules ===
 
-## Laravel 11
+## Laravel 12
 
 - Use the `search-docs` tool to get version specific documentation.
-- This project upgraded from Laravel 10 without migrating to the new streamlined Laravel 11 file structure.
-- This is **perfectly fine** and recommended by Laravel. Follow the existing structure from Laravel 10. We do not to need migrate to the Laravel 11 structure unless the user explicitly requests that.
+- This project has been upgraded to Laravel 12 (a maintenance release with minimal breaking changes).
+- Laravel 12 uses the streamlined application structure introduced in Laravel 11.
 
-### Laravel 10 Structure
-- Middleware typically live in `app/Http/Middleware/` and service providers in `app/Providers/`.
-- There is no `bootstrap/app.php` application configuration in a Laravel 10 structure:
-    - Middleware registration is in `app/Http/Kernel.php`
-    - Exception handling is in `app/Exceptions/Handler.php`
-    - Console commands and schedule registration is in `app/Console/Kernel.php`
-    - Rate limits likely exist in `RouteServiceProvider` or `app/Http/Kernel.php`
+### Laravel 12 Structure
+- This project uses the modern Laravel structure with `bootstrap/app.php` as the central configuration file
+- Middleware, exception handling, routing, and scheduling are all configured in `bootstrap/app.php`
+- Middleware still live in `app/Http/Middleware/` and service providers in `app/Providers/`
+- No separate Kernel.php files - everything is configured through the Application configuration in `bootstrap/app.php`
+
+### Key Changes in Laravel 12
+- Laravel 12 is primarily a maintenance release focused on dependency updates
+- Minimal breaking changes from Laravel 11
+- Most applications can upgrade without changing application code
+- SQLite is now the default database for new applications
 
 ### Database
 - When modifying a column, the migration must include all of the attributes that were previously defined on the column. Otherwise, they will be dropped and lost.
-- Laravel 11 allows limiting eagerly loaded records natively, without external packages: `$query->latest()->limit(10);`.
+- Laravel 12 continues to support limiting eagerly loaded records natively: `$query->latest()->limit(10);`.
 
 ### Models
 - Casts can and likely should be set in a `casts()` method on a model rather than the `$casts` property. Follow existing conventions from other models.
 
-### New Artisan Commands
-- List Artisan commands using Boost's MCP tool, if available. New commands available in Laravel 11:
+### Artisan Commands
+- List Artisan commands using Boost's MCP tool, if available. Commands available in Laravel 12:
     - `php artisan make:enum`
     - `php artisan make:class`
     - `php artisan make:interface`
@@ -390,18 +398,19 @@ document.addEventListener('livewire:init', function () {
 ## Laravel Pint Code Formatter
 
 - You must run `vendor/bin/pint --dirty` before finalizing changes to ensure your code matches the project's expected style.
+- For faster execution, you can run Pint in parallel mode: `vendor/bin/pint --parallel` or `vendor/bin/pint --dirty --parallel`
 - Do not run `vendor/bin/pint --test`, simply run `vendor/bin/pint` to fix any formatting issues.
 
 
-=== pest/core rules ===
+=== pest/v3 rules ===
 
-## Pest
+## Pest 3
 
 ### Testing
 - If you need to verify a feature is working, write or update a Unit / Feature test.
 
 ### Pest Tests
-- All tests must be written using Pest. Use `php artisan make:test --pest <name>`.
+- All tests must be written using Pest v3. Use `php artisan make:test --pest <name>`.
 - You must not remove any tests or test files from the tests directory without approval. These are not temporary or helper files - these are core to the application.
 - Tests should test all of the happy paths, failure paths, and weird paths.
 - Tests live in the `tests/Feature` and `tests/Unit` directories.

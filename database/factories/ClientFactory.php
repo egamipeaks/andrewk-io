@@ -20,6 +20,7 @@ class ClientFactory extends Factory
             'name' => fake()->company(),
             'email' => fake()->unique()->companyEmail(),
             'currency' => fake()->randomElement(['USD', 'CAD']),
+            'hourly_rate' => fake()->randomFloat(2, 50, 250), // Between $50-$250/hour
         ];
     }
 }
