@@ -23,9 +23,18 @@ class InvoiceLinesRelationManager extends RelationManager
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('hourly_rate')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('hours'),
+                    ->label('Hourly Rate')
+                    ->numeric()
+                    ->prefix('$')
+                    ->step(0.01)
+                    ->default(function ($livewire) {
+                        return $livewire->getOwnerRecord()->client->hourly_rate ?? null;
+                    })
+                    ->required(),
+                Forms\Components\TextInput::make('hours')
+                    ->numeric()
+                    ->step(0.25)
+                    ->placeholder('8.0'),
             ]);
     }
 
@@ -33,9 +42,20 @@ class InvoiceLinesRelationManager extends RelationManager
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('description'),
-                Tables\Columns\TextColumn::make('hourly_rate'),
-                Tables\Columns\TextColumn::make('hours'),
+                Tables\Columns\TextColumn::make('description')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('hourly_rate')
+                    ->label('Hourly Rate')
+                    ->money()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('hours')
+                    ->numeric(decimalPlaces: 2)
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('subtotal')
+                    ->label('Subtotal')
+                    ->formatStateUsing(fn ($record): string => $record->formattedSubTotal())
+                    ->sortable(),
             ])
             ->filters([
                 //
