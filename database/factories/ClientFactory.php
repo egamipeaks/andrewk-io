@@ -19,6 +19,7 @@ class ClientFactory extends Factory
         return [
             'name' => fake()->company(),
             'email' => fake()->unique()->companyEmail(),
+            'currency' => fake()->randomElement(['USD', 'CAD']),
         ];
     }
 }

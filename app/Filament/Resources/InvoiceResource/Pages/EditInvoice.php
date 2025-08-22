@@ -15,6 +15,10 @@ class EditInvoice extends EditRecord
     {
         return [
             Actions\Action::make('Send')->action('sendInvoiceEmail'),
+            Actions\Action::make('Send Test Email')
+                ->action('sendTestEmail')
+                ->color('info')
+                ->icon('heroicon-o-beaker'),
             Actions\DeleteAction::make(),
         ];
     }
@@ -25,6 +29,18 @@ class EditInvoice extends EditRecord
 
         Notification::make()
             ->title('Email Sent')
+            ->success()
+            ->send();
+    }
+
+    public function sendTestEmail()
+    {
+        $this->record->sendTestEmail();
+        $adminEmail = config('mail.admin_email');
+
+        Notification::make()
+            ->title('Test Email Sent')
+            ->body('Test email sent to: '.$adminEmail)
             ->success()
             ->send();
     }

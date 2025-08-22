@@ -20,6 +20,7 @@ class InvoiceFactory extends Factory
         return [
             'client_id' => Client::factory(),
             'paid' => fake()->randomElement([0, 1]), // 50% chance of being paid
+            'currency' => fake()->randomElement(['USD', 'CAD']),
             'due_date' => fake()->dateTimeBetween('now', '+60 days'),
             'note' => fake()->optional()->sentence(),
         ];

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\Currency;
 use App\Filament\Resources\InvoiceResource\Pages;
 use App\Filament\Resources\InvoiceResource\RelationManagers;
 use App\Models\Invoice;
@@ -26,6 +27,19 @@ class InvoiceResource extends Resource
             ->schema([
                 Forms\Components\Select::make('client_id')
                     ->relationship('client', 'name')
+                    ->required()
+                    ->live()
+                    ->afterStateUpdated(function ($set, $state) {
+                        if ($state) {
+                            $client = \App\Models\Client::find($state);
+                            if ($client) {
+                                $set('currency', $client->currency->value);
+                            }
+                        }
+                    }),
+                Forms\Components\Select::make('currency')
+                    ->options(Currency::class)
+                    ->default(Currency::USD)
                     ->required(),
                 Forms\Components\Toggle::make('paid')
                     ->required(),
@@ -43,8 +57,15 @@ class InvoiceResource extends Resource
                 Tables\Columns\TextColumn::make('client.name')
                     ->label('Client'),
                 Tables\Columns\TextColumn::make('id'),
+                Tables\Columns\TextColumn::make('currency')
+                    ->badge()
+                    ->color(fn ($state) => match ($state?->value) {
+                        'USD' => 'success',
+                        'CAD' => 'info',
+                        default => 'gray',
+                    }),
                 Tables\Columns\TextColumn::make('total')
-                    ->formatStateUsing(fn (string $state): string => '$'.number_format($state, 2)),
+                    ->formatStateUsing(fn ($record): string => $record->formattedTotal()),
                 Tables\Columns\TextColumn::make('due_date')
                     ->date(),
                 Tables\Columns\IconColumn::make('paid')
