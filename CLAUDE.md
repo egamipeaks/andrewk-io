@@ -4,8 +4,8 @@
 This is Andrew's personal website built with Laravel 11, featuring a blog, portfolio/work showcase, and an admin panel for client and invoice management using Filament.
 
 ## Tech Stack
-- **Backend**: Laravel 11 (PHP 8.2+)
-- **Admin Panel**: Filament 3.0
+- **Backend**: Laravel 11 (PHP 8.4.8)
+- **Admin Panel**: Filament 4.0
 - **Frontend**: Blade templates with Tailwind CSS
 - **Build Tools**: Vite
 - **Database**: MySQL/PostgreSQL (Laravel migrations)
@@ -14,6 +14,9 @@ This is Andrew's personal website built with Laravel 11, featuring a blog, portf
   - Pizzazz (page caching package)
   - Laravel Ray (debugging)
   - Laravel Sanctum (API authentication)
+  - Resend Laravel (email service provider)
+  - Laravel Boost (development tools)
+  - Doctrine DBAL (database abstraction layer)
 
 ## Project Structure
 ```
