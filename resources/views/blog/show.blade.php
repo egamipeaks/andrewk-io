@@ -9,7 +9,7 @@
             </time>
         </header>
 
-        <div class="blog-content prose lg:prose-md prose-gray dark:prose-invert max-w-none">
+        <div class="blog-content max-w-none">
             {!! $content !!}
         </div>
     </article>

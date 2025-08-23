@@ -5,6 +5,8 @@
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
+@variant dark (&:where(.dark, .dark *));
+
 @theme {
     --font-sans: 'Roboto', 'sans-serif';
 }
@@ -21,4 +23,89 @@ body {
     font-family:
         'IBM Plex Mono',
         monospace;
+}
+
+/* Blog content typography styles for Markdown */
+.blog-content {
+    @apply text-gray-900 dark:text-gray-100;
+}
+
+.blog-content h1 {
+    @apply text-3xl font-bold mb-4 mt-8 text-gray-900 dark:text-gray-100;
+}
+
+.blog-content h2 {
+    @apply text-2xl font-bold mb-3 mt-6 text-gray-900 dark:text-gray-100;
+}
+
+.blog-content h3 {
+    @apply text-xl font-bold mb-2 mt-4 text-gray-900 dark:text-gray-100;
+}
+
+.blog-content h4 {
+    @apply text-lg font-bold mb-2 mt-3 text-gray-900 dark:text-gray-100;
+}
+
+.blog-content p {
+    @apply mb-4 leading-relaxed;
+}
+
+.blog-content ul {
+    @apply list-disc list-inside mb-4 space-y-1;
+}
+
+.blog-content ol {
+    @apply list-decimal list-inside mb-4 space-y-1;
+}
+
+.blog-content li {
+    @apply mb-1;
+}
+
+.blog-content a {
+    @apply text-blue-600 dark:text-blue-400 underline hover:text-blue-800 dark:hover:text-blue-300;
+}
+
+.blog-content code {
+    @apply bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-sm font-mono;
+}
+
+.blog-content pre {
+    @apply bg-gray-900 dark:bg-gray-950 p-4 rounded-lg overflow-x-auto mb-4;
+}
+
+.blog-content pre code {
+    @apply bg-transparent p-0 text-gray-100;
+}
+
+.blog-content blockquote {
+    @apply border-l-4 border-gray-300 dark:border-gray-600 pl-4 italic my-4 text-gray-700 dark:text-gray-300;
+}
+
+.blog-content hr {
+    @apply border-t border-gray-300 dark:border-gray-700 my-8;
+}
+
+.blog-content img {
+    @apply max-w-full h-auto rounded-lg my-4;
+}
+
+.blog-content table {
+    @apply w-full mb-4 border-collapse;
+}
+
+.blog-content th {
+    @apply bg-gray-100 dark:bg-gray-800 font-bold text-left p-2 border border-gray-300 dark:border-gray-700;
+}
+
+.blog-content td {
+    @apply p-2 border border-gray-300 dark:border-gray-700;
+}
+
+.blog-content strong {
+    @apply font-bold;
+}
+
+.blog-content em {
+    @apply italic;
 }
