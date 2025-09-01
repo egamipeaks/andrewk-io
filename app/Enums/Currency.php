@@ -25,6 +25,6 @@ enum Currency: string
 
     public function format(float $amount): string
     {
-        return $this->symbol().number_format($amount, 2);
+        return $this->symbol().number_format($amount, fmod($amount, 1) ? 2 : 0);
     }
 }
