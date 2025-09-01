@@ -30,6 +30,8 @@
     </tbody>
 </table>
 
+<br>
+
 @if ($invoice->note)
 <strong>Note:</strong><br>
 {{ $invoice->note }}
