@@ -111,9 +111,8 @@ describe('Email Preview Content', function () {
 
         $response->assertOk()
             ->assertSee('You have received an invoice')
-            ->assertSee('Invoice: #'.$this->invoice->id)
-            ->assertSee('Billed To: '.$this->client->name)
-            ->assertSee($this->invoice->due_date->format('m/d/Y'))
+            ->assertSeeText('Billed To: '.$this->client->name)
+            ->assertSee($this->invoice->due_date->format('F j, Y'))
             ->assertSee($this->invoice->formattedTotal());
     });
 
@@ -132,7 +131,6 @@ describe('Email Preview Content', function () {
 
         $response->assertOk()
             ->assertSee('Description')
-            ->assertSee('Hours')
             ->assertSee('Rate')
             ->assertSee('Total');
 

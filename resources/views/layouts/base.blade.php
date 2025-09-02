@@ -1,11 +1,27 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="light">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Andrew Krzynowek - Laravel Developer & Musician</title>
     <meta name="theme-color" content="#ffffff" id="theme-color">
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&display=swap" rel="stylesheet">
+
+    <script>
+        // Apply theme ASAP to avoid flash of incorrect theme
+        (function () {
+            try {
+                const stored = localStorage.getItem('theme') || 'system';
+                const mql = window.matchMedia('(prefers-color-scheme: dark)');
+                const isDark = stored === 'dark' || (stored === 'system' && mql.matches);
+                const html = document.documentElement;
+                html.classList.toggle('dark', isDark);
+                html.classList.toggle('light', !isDark);
+                const themeColor = document.getElementById('theme-color');
+                if (themeColor) themeColor.content = isDark ? '#111827' : '#ffffff';
+            } catch (e) {}
+        })();
+    </script>
 
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -19,18 +35,50 @@
                     <a href="/work" class="font-medium text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Work</a>
                     <a href="/blog/laravel-wordpress-migration" class="font-medium text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Blog</a>
                 </div>
-                <button
-                    id="theme-toggle"
-                    class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer"
-                    aria-label="Toggle theme"
-                >
-                    <svg class="w-5 h-5 hidden dark:block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h1M4 12H3m15.364 6.364l.707.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M12 7a5 5 0 100 10 5 5 0 000-10z" />
-                    </svg>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 block dark:hidden" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
-                    </svg>
-                </button>
+                <div class="relative">
+                    <button
+                        id="theme-toggle"
+                        class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors cursor-pointer"
+                        aria-label="Toggle theme"
+                        aria-haspopup="menu"
+                        aria-expanded="false"
+                        title="Select theme"
+                    >
+                        <!-- Light icon -->
+                        <svg id="icon-light" class="w-5 h-5 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v2m0 14v2m8-8h2M2 12H4m13.657 6.343l1.414 1.414M4.929 4.929L6.343 6.343m9.9-1.414l-1.414 1.414M6.343 17.657l-1.414 1.414M12 8a4 4 0 100 8 4 4 0 000-8z" />
+                        </svg>
+                        <!-- Dark icon -->
+                        <svg id="icon-dark" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                        </svg>
+                        <!-- System icon -->
+                        <svg id="icon-system" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h7v2H7a1 1 0 100 2h10a1 1 0 100-2h-3v-2h7a1 1 0 001-1V5a1 1 0 00-1-1H3zm1 2h16v8H4V6z" />
+                        </svg>
+                    </button>
+
+                    <div id="theme-menu" class="hidden absolute right-0 mt-2 w-40 rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-lg py-1 z-50">
+                        <button type="button" data-mode="light" class="flex items-center w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <span>Light</span>
+                            <svg id="check-light" class="w-4 h-4 ml-auto hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-7.5 7.5a1 1 0 01-1.414 0l-3-3a1 1 0 111.414-1.414L8.5 12.086l6.793-6.793a1 1 0 011.414 0z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                        <button type="button" data-mode="dark" class="flex items-center w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <span>Dark</span>
+                            <svg id="check-dark" class="w-4 h-4 ml-auto hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-7.5 7.5a1 1 0 01-1.414 0l-3-3a1 1 0 111.414-1.414L8.5 12.086l6.793-6.793a1 1 0 011.414 0z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                        <button type="button" data-mode="system" class="flex items-center w-full px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+                            <span>System</span>
+                            <svg id="check-system" class="w-4 h-4 ml-auto hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-7.5 7.5a1 1 0 01-1.414 0l-3-3a1 1 0 111.414-1.414L8.5 12.086l6.793-6.793a1 1 0 011.414 0z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
             </div>
         </nav>
 
@@ -63,27 +111,96 @@
     </div>
 
     <script>
-        const themeToggle = document.getElementById('theme-toggle');
-        const html = document.documentElement;
-        const themeColor = document.getElementById('theme-color');
+        (function () {
+            const KEY = 'theme';
+            const html = document.documentElement;
+            const themeColor = document.getElementById('theme-color');
+            const toggleBtn = document.getElementById('theme-toggle');
+            const menu = document.getElementById('theme-menu');
+            const iconLight = document.getElementById('icon-light');
+            const iconDark = document.getElementById('icon-dark');
+            const iconSystem = document.getElementById('icon-system');
+            const mql = window.matchMedia('(prefers-color-scheme: dark)');
 
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        html.className = savedTheme;
-        updateThemeColor();
+            let mode = localStorage.getItem(KEY) || 'system';
 
-        themeToggle.addEventListener('click', () => {
-            const currentTheme = html.className;
-            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            function resolveIsDark(m) {
+                return m === 'dark' || (m === 'system' && mql.matches);
+            }
 
-            html.className = newTheme;
-            localStorage.setItem('theme', newTheme);
-            updateThemeColor();
-        });
+            function apply(modeToApply) {
+                const isDark = resolveIsDark(modeToApply);
+                html.classList.toggle('dark', isDark);
+                html.classList.toggle('light', !isDark);
+                if (themeColor) themeColor.content = isDark ? '#111827' : '#ffffff';
 
-        function updateThemeColor() {
-            const isDark = html.className === 'dark';
-            themeColor.content = isDark ? '#111827' : '#ffffff';
-        }
+                // Update icons to reflect current mode selection
+                iconLight.classList.toggle('hidden', modeToApply !== 'light');
+                iconDark.classList.toggle('hidden', modeToApply !== 'dark');
+                iconSystem.classList.toggle('hidden', modeToApply !== 'system');
+
+                // Update checks in dropdown
+                const checks = {
+                    light: document.getElementById('check-light'),
+                    dark: document.getElementById('check-dark'),
+                    system: document.getElementById('check-system'),
+                };
+                Object.entries(checks).forEach(([k, el]) => el && el.classList.toggle('hidden', k !== modeToApply));
+
+                // Update ARIA label for accessibility
+                if (toggleBtn) toggleBtn.setAttribute('aria-label', `Theme: ${modeToApply}`);
+            }
+
+            // React to OS changes when in system mode
+            mql.addEventListener?.('change', () => {
+                if ((localStorage.getItem(KEY) || 'system') === 'system') {
+                    apply('system');
+                }
+            });
+
+            // Initial paint
+            apply(mode);
+
+            function openMenu() {
+                if (!menu) return;
+                menu.classList.remove('hidden');
+                toggleBtn?.setAttribute('aria-expanded', 'true');
+            }
+
+            function closeMenu() {
+                if (!menu) return;
+                menu.classList.add('hidden');
+                toggleBtn?.setAttribute('aria-expanded', 'false');
+            }
+
+            toggleBtn?.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (menu?.classList.contains('hidden')) openMenu(); else closeMenu();
+            });
+
+            // Handle selection
+            menu?.querySelectorAll('[data-mode]')?.forEach((btn) => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const selected = btn.getAttribute('data-mode');
+                    if (selected) {
+                        mode = selected;
+                        localStorage.setItem(KEY, mode);
+                        apply(mode);
+                    }
+                    closeMenu();
+                });
+            });
+
+            // Click outside to close
+            document.addEventListener('click', (e) => {
+                if (!menu || menu.classList.contains('hidden')) return;
+                const target = e.target;
+                if (!menu.contains(target) && target !== toggleBtn) {
+                    closeMenu();
+                }
+            });
+        })();
     </script>
 </body>
 </html>

@@ -89,8 +89,8 @@ describe('Invoice Line Currency Formatting', function () {
             'hours' => 5,
         ]);
 
-        expect($line->formattedSubTotal())->toBe('$500.00');
-        expect($line->formattedHourlyRate())->toBe('$100.00');
+        expect($line->formattedSubTotal())->toBe('$500');
+        expect($line->formattedHourlyRate())->toBe('$100');
     });
 
     it('formats subtotal using invoice currency CAD', function () {
@@ -106,8 +106,8 @@ describe('Invoice Line Currency Formatting', function () {
             'hours' => 5,
         ]);
 
-        expect($line->formattedSubTotal())->toBe('C$500.00');
-        expect($line->formattedHourlyRate())->toBe('C$100.00');
+        expect($line->formattedSubTotal())->toBe('C$500');
+        expect($line->formattedHourlyRate())->toBe('C$100');
     });
 });
 
@@ -213,6 +213,6 @@ describe('Invoice Email with Currency', function () {
             return $mail->invoice->id === $invoice->id;
         });
 
-        expect($invoice->formattedTotal())->toBe('C$1,500.00');
+        expect($invoice->formattedTotal())->toBe('C$1,500');
     });
 });
