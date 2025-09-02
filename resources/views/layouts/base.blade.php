@@ -34,6 +34,9 @@
                     <a href="/" class="font-medium text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Home</a>
                     <a href="/work" class="font-medium text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Work</a>
                     <a href="/blog/laravel-wordpress-migration" class="font-medium text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Blog</a>
+                    @auth
+                        <a href="/admin" class="font-medium text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Admin</a>
+                    @endauth
                 </div>
                 <div class="relative">
                     <button
