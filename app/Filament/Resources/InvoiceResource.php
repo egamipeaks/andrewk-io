@@ -66,6 +66,9 @@ class InvoiceResource extends Resource
                     }),
                 Tables\Columns\TextColumn::make('total')
                     ->formatStateUsing(fn ($record): string => $record->formattedTotal()),
+                Tables\Columns\TextColumn::make('total_hours')
+                    ->label('Hours')
+                    ->numeric(decimalPlaces: 1),
                 Tables\Columns\TextColumn::make('due_date')
                     ->date(),
                 Tables\Columns\IconColumn::make('paid')

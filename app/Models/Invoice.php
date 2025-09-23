@@ -45,6 +45,11 @@ class Invoice extends Model
         return $this->invoiceLines->sum('subtotal');
     }
 
+    public function getTotalHoursAttribute()
+    {
+        return $this->invoiceLines->sum('hours');
+    }
+
     public function formattedTotal(): string
     {
         $currency = $this->currency ?? Currency::USD;

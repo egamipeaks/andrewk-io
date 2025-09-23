@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Andrew Krzynowek - Laravel Developer & Musician</title>
     <meta name="theme-color" content="#ffffff" id="theme-color">
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&display=swap" rel="stylesheet">
 
     <script>
         // Apply theme ASAP to avoid flash of incorrect theme
