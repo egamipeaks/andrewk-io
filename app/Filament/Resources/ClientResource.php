@@ -32,6 +32,12 @@ class ClientResource extends Resource
                     ->email()
                     ->required()
                     ->maxLength(255),
+                Forms\Components\TextInput::make('email_from')
+                    ->label('Send Invoices From')
+                    ->email()
+                    ->maxLength(255)
+                    ->placeholder(config('mail.from.address'))
+                    ->helperText('Email address to use when sending invoices to this client. Leave blank to use the default.'),
                 Forms\Components\Select::make('currency')
                     ->options(Currency::class)
                     ->default(Currency::USD)

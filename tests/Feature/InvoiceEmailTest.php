@@ -172,6 +172,48 @@ describe('Email Configuration', function () {
 
         expect(config('mail.admin_email'))->toBe('custom@example.com');
     });
+
+    it('uses client email_from when set', function () {
+        Mail::fake();
+
+        $client = Client::factory()->create([
+            'email' => 'custom-client@example.com',
+            'email_from' => 'custom@andrewk.io',
+        ]);
+
+        $invoice = Invoice::factory()->create([
+            'client_id' => $client->id,
+            'due_date' => now()->addDays(30),
+        ]);
+
+        $invoice->sendInvoiceEmail();
+
+        Mail::assertSent(InvoiceEmail::class, function ($mail) {
+            return $mail->hasFrom('custom@andrewk.io');
+        });
+    });
+
+    it('uses default mail.from.address when client email_from is not set', function () {
+        Mail::fake();
+
+        config(['mail.from.address' => 'default@andrewk.io']);
+
+        $client = Client::factory()->create([
+            'email' => 'another-client@example.com',
+            'email_from' => null,
+        ]);
+
+        $invoice = Invoice::factory()->create([
+            'client_id' => $client->id,
+            'due_date' => now()->addDays(30),
+        ]);
+
+        $invoice->sendInvoiceEmail();
+
+        Mail::assertSent(InvoiceEmail::class, function ($mail) {
+            return $mail->hasFrom('default@andrewk.io');
+        });
+    });
 });
 
 describe('Integration Tests', function () {

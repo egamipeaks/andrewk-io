@@ -34,8 +34,10 @@ class InvoiceEmail extends Mailable
      */
     public function envelope(): Envelope
     {
+        $fromEmail = $this->invoice->client->email_from ?? config('mail.from.address');
+
         return new Envelope(
-            from: new Address(config('mail.from.address'), 'Andrew Krzynowek'),
+            from: new Address($fromEmail, 'Andrew Krzynowek'),
             subject: sprintf(
                 'Invoice (#%d) from Andrew Krzynowek due on %s',
                 $this->invoice->id,
