@@ -13,14 +13,14 @@ class InvoiceLinesRelationManager extends RelationManager
 {
     protected static string $relationship = 'invoiceLines';
 
-    protected static ?string $recordTitleAttribute = 'description';
-
     public function form(Schema $schema): Schema
     {
         return $schema
+            ->columns(2)
             ->schema([
-                Forms\Components\TextInput::make('description')
+                Forms\Components\Textarea::make('description')
                     ->required()
+                    ->columnSpanFull()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('hourly_rate')
                     ->label('Hourly Rate')
@@ -34,6 +34,7 @@ class InvoiceLinesRelationManager extends RelationManager
                 Forms\Components\TextInput::make('hours')
                     ->numeric()
                     ->step(0.25)
+                    ->default(1)
                     ->placeholder('8.0'),
             ]);
     }
@@ -44,6 +45,7 @@ class InvoiceLinesRelationManager extends RelationManager
             ->columns([
                 Tables\Columns\TextColumn::make('description')
                     ->searchable()
+                    ->limit(80)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('hourly_rate')
                     ->label('Hourly Rate')
