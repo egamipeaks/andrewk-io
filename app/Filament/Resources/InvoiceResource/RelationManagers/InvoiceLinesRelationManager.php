@@ -42,6 +42,7 @@ class InvoiceLinesRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
+            ->defaultPaginationPageOption(30)
             ->columns([
                 Tables\Columns\TextColumn::make('description')
                     ->searchable()
