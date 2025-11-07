@@ -1,26 +1,11 @@
 # Time Tracking & Invoicing Feature Plan
 
-**Status:** Planning
+**Status:** In Progress - Phase 1 & 2 Complete
 **Created:** 2025-01-07
-**Last Updated:** 2025-01-07
+**Last Updated:** 2025-11-07
 
 ## Overview
 Build a spreadsheet-like time entry system with monthly views and seamless invoice integration, add date tracking to invoice lines, and formalize invoice line types (Fixed Amount vs. Hourly).
-
-Completed so far:
-- ✅ InvoiceLineType enum with Fixed/Hourly cases
-- ✅ Database migrations for date/type columns and time_entries table
-- ✅ Updated InvoiceLine model with casts and factory
-- ✅ Updated InvoiceLinesRelationManager with conditional forms and type badges
-- ✅ TimeEntry model with scopes, relationships, and computed attributes
-- ✅ Added relationships to Client and InvoiceLine models
-
-Next up - Phase 3 (Time Tracking UI):
-Steps 8-12 involve building the spreadsheet-style time tracking interface. This is the most complex phase and will require:
-- Creating a custom Filament page
-- Building a Livewire component with a grid layout
-- Implementing modals for detailed entry
-- Adding save functionality and calculations
 
 ---
 
@@ -274,26 +259,65 @@ Steps 8-12 involve building the spreadsheet-style time tracking interface. This 
 
 ---
 
-## 12. Implementation Order
+## 12. Implementation Order & Status
 
-1. **Create `InvoiceLineType` enum** (Fixed, Hourly cases with labels)
-2. **Migration: Add `date` and `type` to `invoice_lines`** (both nullable, no backfill)
-3. **Update `InvoiceLine` model** (add date & type casts, update factory, update subtotal logic)
-4. **Update `InvoiceLinesRelationManager`** (add type selection, conditional fields, update table)
-5. **Migration: Create `time_entries` table**
-6. **Create `TimeEntry` model** (with relationships, scopes, computed attributes)
-7. **Update `Client` and `InvoiceLine` models** (add time entries relationships)
-8. **Create `TimeTracking` Filament page** (basic structure + navigation)
-9. **Build spreadsheet table UI** (Livewire component with grid)
-10. **Implement detail modal** (for multiple task entries per day)
-11. **Add save functionality** (batch operations with manual save button)
-12. **Add summary calculations** (per-client and grand totals)
-13. **Create "Import Time Entries" action** (on invoice edit page, sets type = Hourly)
-14. **Add visual indicators** (invoice lines linked to time entries, type badges)
-15. **Update invoice display/email templates** (handle both types properly)
-16. **Update `ClientResource`** (unbilled hours/revenue columns)
-17. **Write comprehensive tests** (feature + unit tests for both types)
-18. **Run Pint** for code formatting
+### ✅ Phase 1: Foundation (Steps 1-4) - COMPLETED
+1. ✅ **Create `InvoiceLineType` enum** (Fixed, Hourly cases with labels)
+   - Created at `app/Enums/InvoiceLineType.php`
+   - Includes `label()` and `color()` methods
+2. ✅ **Migration: Add `date` and `type` to `invoice_lines`** (both nullable)
+   - Migration created: `2025_11_07_222154_add_date_and_type_to_invoice_lines_table.php`
+   - Includes automatic backfill setting existing records to 'hourly'
+   - Both migrations run successfully
+3. ✅ **Update `InvoiceLine` model** (add date & type casts, update factory, update subtotal logic)
+   - Added casts for `date` and `type` (InvoiceLineType enum)
+   - Updated factory with `.fixed()` and `.hourly()` states
+   - Existing subtotal logic works correctly with both types
+4. ✅ **Update `InvoiceLinesRelationManager`** (add type selection, conditional fields, update table)
+   - Type selector with live reactivity
+   - Conditional fields (amount for Fixed, hourly_rate+hours for Hourly)
+   - Date picker with default to today
+   - Type badges in table with filtering
+   - Default sort by date descending
+
+### ✅ Phase 2: Time Tracking Infrastructure (Steps 5-7) - COMPLETED
+5. ✅ **Migration: Create `time_entries` table**
+   - Migration created: `2025_11_07_222617_create_time_entries_table.php`
+   - Includes foreign keys, indexes for performance
+   - Migration run successfully
+6. ✅ **Create `TimeEntry` model** (with relationships, scopes, computed attributes)
+   - Created at `app/Models/TimeEntry.php`
+   - Relationships: `client()`, `invoiceLine()`
+   - Scopes: `unbilled()`, `billed()`, `forMonth()`, `forDateRange()`
+   - Computed attributes: `is_billed`, `value`
+   - Factory with `.billed()` and `.unbilled()` states
+7. ✅ **Update `Client` and `InvoiceLine` models** (add time entries relationships)
+   - Added `timeEntries()` relationship to Client model
+   - Added `timeEntries()` relationship to InvoiceLine model
+
+### ✅ Phase 5: Testing & Quality (Steps 17-18) - COMPLETED
+17. ✅ **Write comprehensive tests** (feature + unit tests for both types)
+    - Unit tests for `InvoiceLineType` enum (4 tests)
+    - Unit tests for `TimeEntry` model (18 tests total - fillable, casts, relationships, scopes, attributes)
+    - Feature tests for `InvoiceLine` types (12 tests - Fixed, Hourly, date field, subtotal logic)
+    - Feature tests for `InvoiceLinesRelationManager` (9 tests - CRUD, filtering, type handling)
+    - **All 39 tests passing with 95 assertions**
+18. ✅ **Run Pint** for code formatting
+    - All changed files formatted successfully
+
+### 🚧 Phase 3: Time Tracking UI (Steps 8-12) - NOT STARTED
+8. ⏸️ **Create `TimeTracking` Filament page** (basic structure + navigation)
+9. ⏸️ **Build spreadsheet table UI** (Livewire component with grid)
+10. ⏸️ **Implement detail modal** (for multiple task entries per day)
+11. ⏸️ **Add save functionality** (batch operations with manual save button)
+12. ⏸️ **Add summary calculations** (per-client and grand totals)
+
+### 🚧 Phase 4: Invoice Integration (Steps 13-16) - NOT STARTED
+13. ⏸️ **Create "Import Time Entries" action** (on invoice edit page, sets type = Hourly)
+14. ⏸️ **Add visual indicators** (invoice lines linked to time entries, type badges)
+    - Note: Type badges already implemented in step 4
+15. ⏸️ **Update invoice display/email templates** (handle both types properly)
+16. ⏸️ **Update `ClientResource`** (unbilled hours/revenue columns)
 
 ---
 
@@ -325,3 +349,59 @@ Steps 8-12 involve building the spreadsheet-style time tracking interface. This 
 - Invoice lines now support two distinct types (Fixed vs. Hourly)
 - Date field added to invoice lines for better context
 - Time entries can only link to Hourly-type invoice lines
+
+---
+
+## Progress Summary
+
+### What's Working Now (Ready to Use)
+✅ **Invoice Lines with Type System**
+- Create Fixed Amount invoice lines for flat-rate projects
+- Create Hourly invoice lines for time-based billing
+- Date tracking on all invoice lines
+- Type badges with color coding (green for Fixed, blue for Hourly)
+- Filter invoice lines by type in the table
+- Conditional forms that show only relevant fields based on type
+
+✅ **Database Infrastructure**
+- `InvoiceLineType` enum properly configured
+- `time_entries` table created with proper relationships and indexes
+- All migrations successfully run
+- Automatic backfill of existing invoice lines to 'hourly' type
+
+✅ **Models & Relationships**
+- `TimeEntry` model with all scopes and computed attributes
+- Relationships properly established between Client ↔ TimeEntry ↔ InvoiceLine
+- Factory support for testing both billed and unbilled time entries
+
+✅ **Test Coverage**
+- 39 tests, 95 assertions - all passing
+- Comprehensive unit tests for enum and model functionality
+- Feature tests for Filament CRUD operations
+- Type-specific validation testing
+
+### What's Next (Optional Future Work)
+
+**Phase 3: Time Tracking UI (Most Complex)**
+- Spreadsheet-style time entry page
+- Monthly calendar view
+- Quick entry across multiple clients
+- Modal for detailed task descriptions
+
+**Phase 4: Invoice Integration (Most Immediately Useful)**
+- "Import Time Entries" button on invoice edit page
+- One-click conversion of unbilled time to invoice lines
+- Visual indicators showing which invoice lines came from time entries
+- Unbilled hours/revenue columns in ClientResource
+
+**Phase 4 Alternative: Email Template Updates (Quick Win)**
+- Update invoice email to properly display both Fixed and Hourly types
+- Show "Rate × Hours" for hourly lines
+- Show just amount for fixed lines
+
+### Recommendations
+
+1. **For Immediate Use**: Start using the invoice line type system now - it's fully functional and tested
+2. **Quick Win**: Update email templates (Step 15) to properly display both types in invoices
+3. **High Value**: Implement "Import Time Entries" action (Step 13) for seamless workflow
+4. **Major Feature**: Build the Time Tracking UI (Steps 8-12) when you need bulk time entry capabilities
