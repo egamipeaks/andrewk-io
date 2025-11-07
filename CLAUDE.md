@@ -79,14 +79,6 @@ php artisan test
 - **invoice_lines**: Individual invoice items
 - **invoice_email_sends**: Email send history
 
-## Recent Updates
-- Upgraded to Laravel 12 and Pest v3
-- Fixed text visibility in dark mode on homepage
-- Updated pizzazz page caching configuration
-- Added page caching with Ray debugging integration
-- Moved social links to footer
-- Added work/portfolio page
-
 ## Environment Setup
 - Uses Laravel Herd for local development
 - Git repository on master branch
@@ -100,6 +92,12 @@ php artisan test
 - Test dark mode compatibility for any UI changes
 - Use existing mail templates and components when possible
 - Pizzazz handles page caching - check config/pizzazz.php for settings
+
+## Active Plans
+- **IMPORTANT**: At the start of each session, check the `plans/` folder for any active feature plans
+- Read all `.md` files in the `plans/` folder to understand ongoing multi-session projects
+- Plans contain detailed specifications, implementation orders, and design decisions
+- Current plans should be referenced when making related changes to ensure consistency
 
 ===
 
