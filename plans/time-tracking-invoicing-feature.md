@@ -7,6 +7,21 @@
 ## Overview
 Build a spreadsheet-like time entry system with monthly views and seamless invoice integration, add date tracking to invoice lines, and formalize invoice line types (Fixed Amount vs. Hourly).
 
+Completed so far:
+- ✅ InvoiceLineType enum with Fixed/Hourly cases
+- ✅ Database migrations for date/type columns and time_entries table
+- ✅ Updated InvoiceLine model with casts and factory
+- ✅ Updated InvoiceLinesRelationManager with conditional forms and type badges
+- ✅ TimeEntry model with scopes, relationships, and computed attributes
+- ✅ Added relationships to Client and InvoiceLine models
+
+Next up - Phase 3 (Time Tracking UI):
+Steps 8-12 involve building the spreadsheet-style time tracking interface. This is the most complex phase and will require:
+- Creating a custom Filament page
+- Building a Livewire component with a grid layout
+- Implementing modals for detailed entry
+- Adding save functionality and calculations
+
 ---
 
 ## 1. Database Schema Changes

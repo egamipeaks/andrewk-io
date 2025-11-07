@@ -33,4 +33,12 @@ class Client extends Model
     {
         return $this->hasMany(Invoice::class);
     }
+
+    /**
+     * Get the time entries associated with the client.
+     */
+    public function timeEntries()
+    {
+        return $this->hasMany(TimeEntry::class);
+    }
 }

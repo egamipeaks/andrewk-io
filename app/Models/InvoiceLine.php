@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use App\Enums\Currency;
+use App\Enums\InvoiceLineType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class InvoiceLine extends Model
 {
@@ -16,14 +18,26 @@ class InvoiceLine extends Model
     protected $fillable = [
         'invoice_id',
         'description',
+        'date',
+        'type',
         'amount',
         'hourly_rate',
         'hours',
     ];
 
+    protected $casts = [
+        'date' => 'date',
+        'type' => InvoiceLineType::class,
+    ];
+
     public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class);
+    }
+
+    public function timeEntries(): HasMany
+    {
+        return $this->hasMany(TimeEntry::class);
     }
 
     public function getSubtotalAttribute()
