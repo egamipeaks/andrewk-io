@@ -6,12 +6,15 @@ use App\Models\Client;
 use App\Models\TimeEntry;
 use Carbon\Carbon;
 use Filament\Actions\Action;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Repeater\TableColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Schemas\Components\Utilities\Get;
 use Illuminate\Support\Collection;
+use Illuminate\Support\HtmlString;
 
 class TimeTracking extends Page
 {
@@ -112,6 +115,7 @@ class TimeTracking extends Page
                         'description' => $entry['description'],
                         'hours' => $entry['hours'],
                         'is_billed' => $entry['is_billed'],
+                        'invoice_line_id' => $entry['invoice_line_id'] ?? null,
                     ];
                 })->toArray();
 
@@ -141,6 +145,7 @@ class TimeTracking extends Page
                         ->table([
                             TableColumn::make('Hours'),
                             TableColumn::make('Description'),
+                            TableColumn::make('Billed'),
                         ])
                         ->schema([
                             TextInput::make('hours')
@@ -150,17 +155,52 @@ class TimeTracking extends Page
                                 ->step(1)
                                 ->minValue(1)
                                 ->maxValue(24)
-                                ->suffix('hrs'),
+                                ->suffix('hrs')
+                                ->disabled(fn (Get $get): bool => $get('is_billed') ?? false),
                             TextInput::make('description')
                                 ->label('Description')
                                 ->placeholder($placeholder)
-                                ->maxLength(1000),
+                                ->maxLength(1000)
+                                ->disabled(fn (Get $get): bool => $get('is_billed') ?? false),
+                            Placeholder::make('billed')
+                                ->hiddenLabel()
+                                ->content(function (Get $get): ?HtmlString {
+                                    if (! ($get('is_billed') ?? false)) {
+                                        return null;
+                                    }
+
+                                    $invoiceLineId = $get('invoice_line_id');
+                                    if (! $invoiceLineId) {
+                                        return new HtmlString('<span class="text-sm text-gray-500">Billed</span>');
+                                    }
+
+                                    $timeEntry = TimeEntry::find($get('id'));
+                                    if (! $timeEntry || ! $timeEntry->invoiceLine) {
+                                        return new HtmlString('<span class="text-sm text-gray-500">Billed</span>');
+                                    }
+
+                                    $invoiceId = $timeEntry->invoiceLine->invoice_id;
+                                    if (! $invoiceId) {
+                                        return new HtmlString('<span class="text-sm text-gray-500">Billed</span>');
+                                    }
+
+                                    $url = route('filament.admin.resources.invoices.edit', ['record' => $invoiceId]);
+
+                                    return new HtmlString(
+                                        '<a href="'.$url.'" class="text-sm text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300">'.
+                                        'View Invoice'.
+                                        '</a>'
+                                    );
+                                }),
                         ])
                         ->compact()
                         ->addActionLabel('Add Time Entry')
                         ->reorderable(false)
                         ->deletable(function (array $state): bool {
-                            return ! ($state['is_billed'] ?? false);
+                            $state = reset($state);
+                            $isBilled = $state['is_billed'] ?? false;
+
+                            return ! $isBilled;
                         }),
                 ];
             })

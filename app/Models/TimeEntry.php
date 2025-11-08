@@ -75,4 +75,15 @@ class TimeEntry extends Model
             get: fn (): float => $this->hours * ($this->client->hourly_rate ?? 0),
         );
     }
+
+    public function getInvoiceDisplayAttribute(): ?string
+    {
+        if (! $this->is_billed) {
+            return null;
+        }
+
+        $invoiceId = $this->invoiceLine->invoice_id ?? null;
+
+        return $invoiceId ? "Billed on Invoice #{$invoiceId}" : 'Billed';
+    }
 }

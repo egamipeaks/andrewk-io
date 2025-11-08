@@ -204,4 +204,142 @@ describe('InvoiceLinesRelationManager Delete', function () {
 
         expect(InvoiceLine::count())->toBe(0);
     });
+
+    it('shows confirmation when deleting invoice line with time entries', function () {
+        $line = InvoiceLine::factory()->hourly()->create(['invoice_id' => $this->invoice->id]);
+        $entry = \App\Models\TimeEntry::factory()->create([
+            'client_id' => $this->client->id,
+            'invoice_line_id' => $line->id,
+        ]);
+
+        Livewire::actingAs($this->admin)
+            ->test(InvoiceLinesRelationManager::class, [
+                'ownerRecord' => $this->invoice,
+                'pageClass' => EditInvoice::class,
+            ])
+            ->callTableAction('delete', $line);
+
+        expect(InvoiceLine::count())->toBe(0);
+    });
+
+    it('unlinks time entries when deleting invoice line', function () {
+        $line = InvoiceLine::factory()->hourly()->create(['invoice_id' => $this->invoice->id]);
+        $entry = \App\Models\TimeEntry::factory()->create([
+            'client_id' => $this->client->id,
+            'invoice_line_id' => $line->id,
+        ]);
+
+        expect($entry->is_billed)->toBeTrue();
+
+        Livewire::actingAs($this->admin)
+            ->test(InvoiceLinesRelationManager::class, [
+                'ownerRecord' => $this->invoice,
+                'pageClass' => EditInvoice::class,
+            ])
+            ->callTableAction('delete', $line);
+
+        $entry->refresh();
+        expect($entry->invoice_line_id)->toBeNull()
+            ->and($entry->is_billed)->toBeFalse();
+    });
+});
+
+describe('InvoiceLinesRelationManager Visual Indicators', function () {
+    it('shows time entry badge when invoice line has linked time entries', function () {
+        $line = InvoiceLine::factory()->hourly()->create(['invoice_id' => $this->invoice->id]);
+        \App\Models\TimeEntry::factory()->create([
+            'client_id' => $this->client->id,
+            'invoice_line_id' => $line->id,
+        ]);
+
+        Livewire::actingAs($this->admin)
+            ->test(InvoiceLinesRelationManager::class, [
+                'ownerRecord' => $this->invoice,
+                'pageClass' => EditInvoice::class,
+            ])
+            ->assertCanSeeTableRecords([$line]);
+    });
+
+    it('shows warning when editing invoice line with time entries', function () {
+        $line = InvoiceLine::factory()->hourly()->create(['invoice_id' => $this->invoice->id]);
+        \App\Models\TimeEntry::factory()->count(2)->create([
+            'client_id' => $this->client->id,
+            'invoice_line_id' => $line->id,
+        ]);
+
+        Livewire::actingAs($this->admin)
+            ->test(InvoiceLinesRelationManager::class, [
+                'ownerRecord' => $this->invoice,
+                'pageClass' => EditInvoice::class,
+            ])
+            ->callTableAction('edit', $line)
+            ->assertHasNoTableActionErrors();
+
+        // The warning should be visible in the form
+        expect($line->timeEntries()->count())->toBe(2);
+    });
+
+    it('can filter by has time entries', function () {
+        $lineWithEntry = InvoiceLine::factory()->hourly()->create(['invoice_id' => $this->invoice->id]);
+        \App\Models\TimeEntry::factory()->create([
+            'client_id' => $this->client->id,
+            'invoice_line_id' => $lineWithEntry->id,
+        ]);
+
+        $lineWithoutEntry = InvoiceLine::factory()->hourly()->create(['invoice_id' => $this->invoice->id]);
+
+        Livewire::actingAs($this->admin)
+            ->test(InvoiceLinesRelationManager::class, [
+                'ownerRecord' => $this->invoice,
+                'pageClass' => EditInvoice::class,
+            ])
+            ->filterTable('has_time_entries', true)
+            ->assertCanSeeTableRecords([$lineWithEntry])
+            ->assertCanNotSeeTableRecords([$lineWithoutEntry]);
+    });
+
+    it('can filter by does not have time entries', function () {
+        $lineWithEntry = InvoiceLine::factory()->hourly()->create(['invoice_id' => $this->invoice->id]);
+        \App\Models\TimeEntry::factory()->create([
+            'client_id' => $this->client->id,
+            'invoice_line_id' => $lineWithEntry->id,
+        ]);
+
+        $lineWithoutEntry = InvoiceLine::factory()->hourly()->create(['invoice_id' => $this->invoice->id]);
+
+        Livewire::actingAs($this->admin)
+            ->test(InvoiceLinesRelationManager::class, [
+                'ownerRecord' => $this->invoice,
+                'pageClass' => EditInvoice::class,
+            ])
+            ->filterTable('has_time_entries', false)
+            ->assertCanSeeTableRecords([$lineWithoutEntry])
+            ->assertCanNotSeeTableRecords([$lineWithEntry]);
+    });
+
+    it('shows view source entries action when invoice line has time entries', function () {
+        $line = InvoiceLine::factory()->hourly()->create(['invoice_id' => $this->invoice->id]);
+        \App\Models\TimeEntry::factory()->create([
+            'client_id' => $this->client->id,
+            'invoice_line_id' => $line->id,
+        ]);
+
+        Livewire::actingAs($this->admin)
+            ->test(InvoiceLinesRelationManager::class, [
+                'ownerRecord' => $this->invoice,
+                'pageClass' => EditInvoice::class,
+            ])
+            ->assertTableActionVisible('viewSourceEntries', $line);
+    });
+
+    it('hides view source entries action when invoice line has no time entries', function () {
+        $line = InvoiceLine::factory()->hourly()->create(['invoice_id' => $this->invoice->id]);
+
+        Livewire::actingAs($this->admin)
+            ->test(InvoiceLinesRelationManager::class, [
+                'ownerRecord' => $this->invoice,
+                'pageClass' => EditInvoice::class,
+            ])
+            ->assertTableActionHidden('viewSourceEntries', $line);
+    });
 });

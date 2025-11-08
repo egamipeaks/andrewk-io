@@ -20,6 +20,23 @@ class InvoiceLinesRelationManager extends RelationManager
         return $schema
             ->columns(2)
             ->schema([
+                Forms\Components\Placeholder::make('time_entries_warning')
+                    ->content(function ($record) {
+                        if (! $record) {
+                            return null;
+                        }
+
+                        $count = $record->timeEntries()->count();
+                        if ($count === 0) {
+                            return null;
+                        }
+
+                        return '⚠️ This line was created from '.$count.' time '.
+                               ($count === 1 ? 'entry' : 'entries').
+                               ". Changes here won't affect the source entries.";
+                    })
+                    ->visible(fn ($record) => $record && $record->timeEntries()->count() > 0)
+                    ->columnSpanFull(),
                 Forms\Components\Select::make('type')
                     ->label('Type')
                     ->options([
@@ -71,6 +88,7 @@ class InvoiceLinesRelationManager extends RelationManager
     {
         return $table
             ->defaultPaginationPageOption(30)
+            ->paginationPageOptions([30, 60])
             ->defaultSort('date', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('type')
@@ -78,6 +96,20 @@ class InvoiceLinesRelationManager extends RelationManager
                     ->color(fn (InvoiceLineType $state): string => $state->color())
                     ->formatStateUsing(fn (InvoiceLineType $state): string => $state->label())
                     ->sortable(),
+                Tables\Columns\TextColumn::make('source')
+                    ->label('Source')
+                    ->badge()
+                    ->color('warning')
+                    ->getStateUsing(function ($record) {
+                        $count = $record->timeEntries()->count();
+                        if ($count === 0) {
+                            return null;
+                        }
+
+                        return $count === 1 ? 'Time Entry' : "{$count} Time Entries";
+                    })
+                    ->placeholder('—')
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('date')
                     ->date()
                     ->sortable(),
@@ -107,13 +139,47 @@ class InvoiceLinesRelationManager extends RelationManager
                         InvoiceLineType::Fixed->value => InvoiceLineType::Fixed->label(),
                         InvoiceLineType::Hourly->value => InvoiceLineType::Hourly->label(),
                     ]),
+                Tables\Filters\TernaryFilter::make('has_time_entries')
+                    ->label('Has Time Entries')
+                    ->queries(
+                        true: fn ($query) => $query->has('timeEntries'),
+                        false: fn ($query) => $query->doesntHave('timeEntries'),
+                    ),
             ])
             ->headerActions([
                 Actions\CreateAction::make(),
             ])
             ->actions([
+                Actions\Action::make('viewSourceEntries')
+                    ->label('Entries')
+                    ->icon('heroicon-o-clock')
+                    ->color('info')
+                    ->visible(fn ($record) => $record->timeEntries()->count() > 0)
+                    ->modalHeading('Source Time Entries')
+                    ->modalContent(fn ($record) => view('filament.components.time-entries-list', [
+                        'entries' => $record->timeEntries,
+                    ]))
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Close'),
                 Actions\EditAction::make(),
-                Actions\DeleteAction::make(),
+                Actions\DeleteAction::make()
+                    ->before(function ($record, Actions\DeleteAction $action) {
+                        $timeEntriesCount = $record->timeEntries()->count();
+                        if ($timeEntriesCount > 0) {
+                            $record->timeEntries()->update(['invoice_line_id' => null]);
+                        }
+                    })
+                    ->requiresConfirmation(fn ($record) => $record->timeEntries()->count() > 0)
+                    ->modalDescription(function ($record) {
+                        $count = $record->timeEntries()->count();
+                        if ($count > 0) {
+                            return "This invoice line has {$count} linked time ".
+                                   ($count === 1 ? 'entry' : 'entries').
+                                   '. They will be unlinked and marked as unbilled.';
+                        }
+
+                        return null;
+                    }),
             ])
             ->bulkActions([
                 Actions\DeleteBulkAction::make(),

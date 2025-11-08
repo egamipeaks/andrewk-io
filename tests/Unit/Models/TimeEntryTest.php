@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Client;
+use App\Models\Invoice;
 use App\Models\InvoiceLine;
 use App\Models\TimeEntry;
 
@@ -128,5 +129,23 @@ describe('TimeEntry Attributes', function () {
         ]);
 
         expect($timeEntry->value)->toBe(0.0);
+    });
+
+    it('returns null invoice display for unbilled entry', function () {
+        $timeEntry = TimeEntry::factory()->unbilled()->create();
+
+        expect($timeEntry->invoice_display)->toBeNull();
+    });
+
+    it('returns invoice display for billed entry', function () {
+        $client = Client::factory()->create();
+        $invoice = Invoice::factory()->create(['client_id' => $client->id]);
+        $invoiceLine = InvoiceLine::factory()->create(['invoice_id' => $invoice->id]);
+        $timeEntry = TimeEntry::factory()->create([
+            'client_id' => $client->id,
+            'invoice_line_id' => $invoiceLine->id,
+        ]);
+
+        expect($timeEntry->invoice_display)->toBe("Billed on Invoice #{$invoice->id}");
     });
 });

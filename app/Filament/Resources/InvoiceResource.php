@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Enums\Currency;
 use App\Filament\Resources\InvoiceResource\Pages;
 use App\Filament\Resources\InvoiceResource\RelationManagers;
+use App\Models\Client;
 use App\Models\Invoice;
 use BackedEnum;
 use Filament\Actions;
@@ -31,7 +32,7 @@ class InvoiceResource extends Resource
                     ->live()
                     ->afterStateUpdated(function ($set, $state) {
                         if ($state) {
-                            $client = \App\Models\Client::find($state);
+                            $client = Client::find($state);
                             if ($client) {
                                 $set('currency', $client->currency->value);
                             }
@@ -44,6 +45,7 @@ class InvoiceResource extends Resource
                 Forms\Components\Toggle::make('paid')
                     ->required(),
                 Forms\Components\DatePicker::make('due_date')
+                    ->default(now()->addDays(15)->addMonth()->startOfMonth())
                     ->required(),
                 Forms\Components\Textarea::make('note')
                     ->maxLength(65535),

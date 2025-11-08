@@ -68,6 +68,22 @@ class ClientResource extends Resource
                     ->label('Hourly Rate')
                     ->money()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('unbilled_hours')
+                    ->label('Unbilled Hours')
+                    ->getStateUsing(fn ($record) => $record->timeEntries()->unbilled()->sum('hours'))
+                    ->numeric(decimalPlaces: 1)
+                    ->placeholder('0.0')
+                    ->sortable(false),
+                Tables\Columns\TextColumn::make('unbilled_revenue')
+                    ->label('Unbilled Revenue')
+                    ->getStateUsing(function ($record) {
+                        $hours = $record->timeEntries()->unbilled()->sum('hours');
+
+                        return $hours * ($record->hourly_rate ?? 0);
+                    })
+                    ->money()
+                    ->placeholder('$0.00')
+                    ->sortable(false),
             ])
             ->filters([
                 //
