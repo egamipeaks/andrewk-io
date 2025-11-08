@@ -15,6 +15,7 @@ use Filament\Pages\Page;
 use Filament\Schemas\Components\Utilities\Get;
 use Illuminate\Support\Collection;
 use Illuminate\Support\HtmlString;
+use Livewire\Attributes\Url;
 
 class TimeTracking extends Page
 {
@@ -30,8 +31,10 @@ class TimeTracking extends Page
 
     protected static bool $shouldRegisterNavigation = true;
 
+    #[Url]
     public int $year;
 
+    #[Url]
     public int $month;
 
     public Collection $clients;
@@ -42,8 +45,14 @@ class TimeTracking extends Page
 
     public function mount(): void
     {
-        $this->year = now()->year;
-        $this->month = now()->month;
+        if (! isset($this->year)) {
+            $this->year = now()->year;
+        }
+
+        if (! isset($this->month)) {
+            $this->month = now()->month;
+        }
+
         $this->loadData();
     }
 
