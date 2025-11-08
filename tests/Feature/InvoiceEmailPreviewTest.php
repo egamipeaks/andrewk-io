@@ -1,6 +1,6 @@
 <?php
 
-use App\Filament\Resources\InvoiceResource\Pages\EditInvoice;
+use App\Filament\Resources\Invoices\Pages\EditInvoice;
 use App\Models\Client;
 use App\Models\Invoice;
 use App\Models\InvoiceLine;

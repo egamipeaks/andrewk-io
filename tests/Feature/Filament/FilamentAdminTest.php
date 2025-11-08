@@ -1,9 +1,9 @@
 <?php
 
-use App\Filament\Resources\ClientResource\Pages\CreateClient;
-use App\Filament\Resources\ClientResource\Pages\EditClient;
-use App\Filament\Resources\InvoiceResource\Pages\CreateInvoice;
-use App\Filament\Resources\InvoiceResource\Pages\EditInvoice;
+use App\Filament\Resources\Clients\Pages\CreateClient;
+use App\Filament\Resources\Clients\Pages\EditClient;
+use App\Filament\Resources\Invoices\Pages\CreateInvoice;
+use App\Filament\Resources\Invoices\Pages\EditInvoice;
 use App\Models\Client;
 use App\Models\Invoice;
 use App\Models\User;

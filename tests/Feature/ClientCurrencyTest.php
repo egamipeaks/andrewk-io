@@ -1,8 +1,8 @@
 <?php
 
 use App\Enums\Currency;
-use App\Filament\Resources\ClientResource\Pages\CreateClient;
-use App\Filament\Resources\ClientResource\Pages\EditClient;
+use App\Filament\Resources\Clients\Pages\CreateClient;
+use App\Filament\Resources\Clients\Pages\EditClient;
 use App\Models\Client;
 use App\Models\Invoice;
 use App\Models\User;

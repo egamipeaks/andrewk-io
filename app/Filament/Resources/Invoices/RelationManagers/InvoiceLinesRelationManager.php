@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\InvoiceResource\RelationManagers;
+namespace App\Filament\Resources\Invoices\RelationManagers;
 
 use App\Enums\InvoiceLineType;
 use Filament\Actions;

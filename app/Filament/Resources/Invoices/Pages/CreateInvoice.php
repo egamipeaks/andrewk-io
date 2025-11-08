@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Filament\Resources\InvoiceResource\Pages;
+namespace App\Filament\Resources\Invoices\Pages;
 
-use App\Filament\Resources\InvoiceResource;
+use App\Filament\Resources\Invoices\InvoiceResource;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateInvoice extends CreateRecord

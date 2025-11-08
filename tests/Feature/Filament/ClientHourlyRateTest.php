@@ -1,9 +1,9 @@
 <?php
 
-use App\Filament\Resources\ClientResource\Pages\CreateClient;
-use App\Filament\Resources\ClientResource\Pages\EditClient;
-use App\Filament\Resources\ClientResource\Pages\ListClients;
-use App\Filament\Resources\InvoiceResource\RelationManagers\InvoiceLinesRelationManager;
+use App\Filament\Resources\Clients\Pages\CreateClient;
+use App\Filament\Resources\Clients\Pages\EditClient;
+use App\Filament\Resources\Clients\Pages\ListClients;
+use App\Filament\Resources\Invoices\RelationManagers\InvoiceLinesRelationManager;
 use App\Models\Client;
 use App\Models\Invoice;
 use App\Models\User;
@@ -110,7 +110,7 @@ describe('Invoice Line Management', function () {
         Livewire::actingAs($this->admin)
             ->test(InvoiceLinesRelationManager::class, [
                 'ownerRecord' => $invoice,
-                'pageClass' => \App\Filament\Resources\InvoiceResource\Pages\EditInvoice::class,
+                'pageClass' => \App\Filament\Resources\Invoices\Pages\EditInvoice::class,
             ])
             ->assertOk();
     });

@@ -1,6 +1,6 @@
 <?php
 
-use App\Filament\Resources\InvoiceResource\Pages\ListInvoices;
+use App\Filament\Resources\Invoices\Pages\ListInvoices;
 use App\Models\Client;
 use App\Models\Invoice;
 use App\Models\User;

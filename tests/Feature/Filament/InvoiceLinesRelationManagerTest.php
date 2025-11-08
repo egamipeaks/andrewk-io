@@ -1,8 +1,8 @@
 <?php
 
 use App\Enums\InvoiceLineType;
-use App\Filament\Resources\InvoiceResource\Pages\EditInvoice;
-use App\Filament\Resources\InvoiceResource\RelationManagers\InvoiceLinesRelationManager;
+use App\Filament\Resources\Invoices\Pages\EditInvoice;
+use App\Filament\Resources\Invoices\RelationManagers\InvoiceLinesRelationManager;
 use App\Models\Client;
 use App\Models\Invoice;
 use App\Models\InvoiceLine;

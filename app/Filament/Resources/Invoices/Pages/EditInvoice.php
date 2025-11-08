@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Filament\Resources\InvoiceResource\Pages;
+namespace App\Filament\Resources\Invoices\Pages;
 
 use App\Enums\InvoiceLineType;
-use App\Filament\Resources\InvoiceResource;
+use App\Filament\Resources\Invoices\InvoiceResource;
 use App\Models\TimeEntry;
 use Filament\Actions;
 use Filament\Forms\Components\CheckboxList;

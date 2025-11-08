@@ -1,8 +1,8 @@
 <?php
 
 use App\Enums\Currency;
-use App\Filament\Resources\InvoiceResource\Pages\CreateInvoice;
-use App\Filament\Resources\InvoiceResource\Pages\EditInvoice;
+use App\Filament\Resources\Invoices\Pages\CreateInvoice;
+use App\Filament\Resources\Invoices\Pages\EditInvoice;
 use App\Mail\InvoiceEmail;
 use App\Models\Client;
 use App\Models\Invoice;
