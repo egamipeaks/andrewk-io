@@ -19,12 +19,12 @@ it('can render the time tracking page', function () {
 });
 
 it('displays clients with hourly rates', function () {
-    $client1 = Client::factory()->create([
+    Client::factory()->create([
         'name' => 'Test Client 1',
         'hourly_rate' => 100,
     ]);
 
-    $client2 = Client::factory()->create([
+    Client::factory()->create([
         'name' => 'Test Client 2',
         'hourly_rate' => 150,
     ]);
@@ -41,7 +41,7 @@ it('displays clients with hourly rates', function () {
 });
 
 it('can navigate between months', function () {
-    $client = Client::factory()->create(['hourly_rate' => 100]);
+    Client::factory()->create(['hourly_rate' => 100]);
 
     $component = livewire(TimeTracking::class);
 
@@ -63,7 +63,7 @@ it('can navigate between months', function () {
 it('displays time entries in cells', function () {
     $client = Client::factory()->create(['hourly_rate' => 100]);
 
-    $entry = TimeEntry::factory()->create([
+    TimeEntry::factory()->create([
         'client_id' => $client->id,
         'date' => now()->startOfMonth()->addDays(5),
         'hours' => 8.5,
@@ -95,7 +95,7 @@ it('can open the edit cell modal with existing entries', function () {
                 [
                     'id' => $entry->id,
                     'description' => 'Existing work',
-                    'hours' => 5,
+                    'hours' => '5.00',
                     'is_billed' => false,
                 ],
             ],
@@ -106,7 +106,8 @@ it('can open the edit cell modal with existing entries', function () {
 
 it('can create new time entries via the modal', function () {
     $client = Client::factory()->create(['hourly_rate' => 100]);
-    $date = now()->startOfMonth()->format('Y-m-d');
+    $date = now()->startOfMonth();
+    $dateString = $date->format('Y-m-d');
 
     $undoRepeaterFake = Repeater::fake();
 
@@ -114,27 +115,26 @@ it('can create new time entries via the modal', function () {
         ->callAction('editCell', data: [
             'entries' => [
                 [
-                    'description' => 'New task',
-                    'hours' => '4.5',
+                    'description' => 'New work entry',
+                    'hours' => 4.5,
                 ],
             ],
         ], arguments: [
             'clientId' => $client->id,
-            'date' => $date,
+            'date' => $dateString,
         ])
         ->assertNotified('Time entries saved');
 
     $undoRepeaterFake();
 
-    $allEntries = TimeEntry::all();
-    $createdEntry = TimeEntry::query()
-        ->where('client_id', $client->id)
+    $entry = TimeEntry::where('client_id', $client->id)
         ->where('date', $date)
-        ->where('description', 'New task')
         ->first();
 
-    expect($createdEntry)->not->toBeNull('No entry was created. All entries: '.json_encode($allEntries->toArray()))
-        ->and((float) $createdEntry->hours)->toBe(4.5);
+    expect($entry)->not->toBeNull()
+        ->and($entry->description)->toBe('New work entry')
+        ->and((float) $entry->hours)->toBe(4.5)
+        ->and($entry->is_billed)->toBeFalse();
 });
 
 it('can update existing time entries', function () {

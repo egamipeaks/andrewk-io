@@ -38,15 +38,15 @@
 
         {{-- Spreadsheet Table --}}
         <div class="overflow-x-auto rounded-lg border border-gray-300 dark:border-gray-700">
-            <table class="w-full text-sm">
-                <thead class="bg-gray-50 dark:bg-gray-800">
+            <table class="text-sm table-auto">
+                <thead class="bg-gray-50 dark:bg-gray-800 sticky top-0 z-20">
                     <tr>
-                        <th class="sticky left-0 z-10 px-4 py-3 text-left font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 border-r border-gray-300 dark:border-gray-700">
+                        <th class="sticky left-0 z-30 px-3 py-2 text-left font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 border-r border-gray-300 dark:border-gray-700 whitespace-nowrap">
                             Day
                         </th>
                         @foreach ($clients as $client)
-                            <th class="px-4 py-3 text-left font-medium text-gray-700 dark:text-gray-300 border-r border-gray-300 dark:border-gray-700 min-w-[150px]">
-                                <div>{{ $client->name }}</div>
+                            <th class="px-3 py-2 text-center font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 border-r border-gray-300 dark:border-gray-700 whitespace-nowrap w-24" title="{{ $client->name }}">
+                                <div>{{ $client->shortName() }}</div>
                                 <div class="text-xs text-gray-500 dark:text-gray-400 font-normal">
                                     {{ $client->currency->symbol() }}{{ number_format($client->hourly_rate, 2) }}/hr
                                 </div>
@@ -63,7 +63,7 @@
                             $hoverBg = $isWeekend ? 'hover:bg-gray-200 dark:hover:bg-gray-700' : 'hover:bg-gray-50 dark:hover:bg-gray-800';
                         @endphp
                         <tr class="border-t border-gray-200 dark:border-gray-800 {{ $rowBg }} {{ $hoverBg }}">
-                            <td class="sticky left-0 z-10 px-4 py-3 font-medium text-gray-700 dark:text-gray-300 {{ $rowBg }} border-r border-gray-300 dark:border-gray-700">
+                            <td class="sticky left-0 z-10 px-3 py-2 font-medium text-gray-700 dark:text-gray-300 {{ $rowBg }} border-r border-gray-300 dark:border-gray-700 whitespace-nowrap">
                                 {{ $currentDate->format('D, n/j') }}
                             </td>
                             @foreach ($clients as $client)
@@ -71,12 +71,12 @@
                                     $cellData = $this->getHoursForCell($client->id, $day);
                                     $date = $currentDate->format('Y-m-d');
                                 @endphp
-                                <td class="border-r border-gray-200 dark:border-gray-800">
+                                <td class="border-r border-gray-200 dark:border-gray-800 w-24">
                                     @if ($cellData)
 {{--                                        {{ ($this->editCellAction)(['clientId' => $client->id, 'date' => $date]) }}--}}
                                         <div
                                             wire:click="mountAction('editCell', { clientId: '{{ $client->id }}', date: '{{ $date }}' })"
-                                            class="cursor-pointer w-full text-left px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors
+                                            class="cursor-pointer w-full text-center px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors
                                                 {{ $cellData['is_billed'] ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300' : 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300' }}"
                                         >
                                             <div class="font-semibold">{{ number_format($cellData['total_hours'], 2) }}</div>
@@ -99,11 +99,11 @@
                     @endfor
                     {{-- Totals Row --}}
                     <tr class="border-t-2 border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 font-semibold">
-                        <td class="sticky left-0 z-10 px-4 py-3 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 border-r border-gray-300 dark:border-gray-700">
+                        <td class="sticky left-0 z-10 px-3 py-2 text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 border-r border-gray-300 dark:border-gray-700 whitespace-nowrap">
                             Total
                         </td>
                         @foreach ($clients as $client)
-                            <td class="px-4 py-3 border-r border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300">
+                            <td class="px-3 py-2 border-r border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 whitespace-nowrap text-center w-24">
                                 <div>{{ number_format($this->getTotalHoursForClient($client->id), 2) }} hrs</div>
                                 <div class="text-xs text-gray-500 dark:text-gray-400 font-normal">
                                     {{ $client->currency->symbol() }}{{ number_format($this->getTotalRevenueForClient($client->id), 2) }}

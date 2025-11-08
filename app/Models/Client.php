@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\Currency;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Client extends Model
 {
@@ -26,19 +27,33 @@ class Client extends Model
         'currency' => 'USD',
     ];
 
-    /**
-     * Get the invoices associated with the client.
-     */
-    public function invoices()
+    public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
     }
 
-    /**
-     * Get the time entries associated with the client.
-     */
-    public function timeEntries()
+    public function timeEntries(): HasMany
     {
         return $this->hasMany(TimeEntry::class);
+    }
+
+    public function shortName(): string
+    {
+        $words = preg_split('/\s+/', trim($this->name));
+
+        if (count($words) > 1) {
+            // Multiple words: create acronym from first letter of each word
+            $acronym = '';
+            foreach ($words as $word) {
+                if (! empty($word)) {
+                    $acronym .= mb_substr($word, 0, 1);
+                }
+            }
+
+            return mb_strtoupper($acronym);
+        }
+
+        // Single word: take first three characters
+        return mb_strtoupper(mb_substr($this->name, 0, 3));
     }
 }

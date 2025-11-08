@@ -7,7 +7,7 @@ use App\Models\TimeEntry;
 use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Repeater\TableColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
@@ -25,6 +25,8 @@ class TimeTracking extends Page
 
     protected static ?int $navigationSort = 2;
 
+    protected static bool $shouldRegisterNavigation = true;
+
     public int $year;
 
     public int $month;
@@ -33,11 +35,18 @@ class TimeTracking extends Page
 
     public array $timeEntriesData = [];
 
+    public ?string $currentEditDate = null;
+
     public function mount(): void
     {
         $this->year = now()->year;
         $this->month = now()->month;
         $this->loadData();
+    }
+
+    public function getHeading(): string
+    {
+        return '';
     }
 
     public function loadData(): void
@@ -93,51 +102,74 @@ class TimeTracking extends Page
                 return "Time Entries - {$client->name} - {$date}";
             })
             ->fillForm(function (array $arguments): array {
+                $this->currentEditDate = $arguments['date'];
                 $key = $arguments['clientId'].'_'.$arguments['date'];
                 $entries = $this->timeEntriesData[$key]['entries'] ?? [];
 
+                $formEntries = collect($entries)->map(function ($entry) {
+                    return [
+                        'id' => $entry['id'],
+                        'description' => $entry['description'],
+                        'hours' => $entry['hours'],
+                        'is_billed' => $entry['is_billed'],
+                    ];
+                })->toArray();
+
+                // If no entries exist, add a default empty entry
+                if (empty($formEntries)) {
+                    $formEntries = [
+                        [
+                            'description' => '',
+                            'hours' => null,
+                            'is_billed' => false,
+                        ],
+                    ];
+                }
+
                 return [
-                    'entries' => collect($entries)->map(function ($entry) {
-                        return [
-                            'id' => $entry['id'],
-                            'description' => $entry['description'],
-                            'hours' => $entry['hours'],
-                            'is_billed' => TimeEntry::find($entry['id'])?->is_billed ?? false,
-                        ];
-                    })->toArray(),
+                    'entries' => $formEntries,
                 ];
             })
-            ->form([
-                Repeater::make('entries')
-                    ->schema([
-                        TextInput::make('id')
-                            ->hidden()
-                            ->dehydrated(),
-                        Textarea::make('description')
-                            ->required()
-                            ->rows(2)
-                            ->columnSpanFull(),
-                        TextInput::make('hours')
-                            ->required()
-                            ->numeric()
-                            ->step(0.25)
-                            ->minValue(0.25)
-                            ->maxValue(24)
-                            ->suffix('hrs'),
-                        TextInput::make('is_billed')
-                            ->hidden()
-                            ->dehydrated(),
-                    ])
-                    ->columns(2)
-                    ->defaultItems(0)
-                    ->addActionLabel('Add Time Entry')
-                    ->reorderable(false)
-                    ->deletable(fn (array $state): bool => ! ($state['is_billed'] ?? false))
-                    ->itemLabel(fn (array $state): ?string => $state['hours'] ? "{$state['hours']} hrs" : null),
-            ])
+            ->schema(function (): array {
+                $placeholderDate = $this->currentEditDate
+                    ? Carbon::parse($this->currentEditDate)->format('M j')
+                    : Carbon::now()->format('M j');
+                $placeholder = "{$placeholderDate} hours";
+
+                return [
+                    Repeater::make('entries')
+                        ->table([
+                            TableColumn::make('Hours'),
+                            TableColumn::make('Description'),
+                        ])
+                        ->schema([
+                            TextInput::make('hours')
+                                ->label('Hours')
+                                ->required()
+                                ->numeric()
+                                ->step(1)
+                                ->minValue(1)
+                                ->maxValue(24)
+                                ->suffix('hrs'),
+                            TextInput::make('description')
+                                ->label('Description')
+                                ->placeholder($placeholder)
+                                ->maxLength(1000),
+                        ])
+                        ->compact()
+                        ->addActionLabel('Add Time Entry')
+                        ->reorderable(false)
+                        ->deletable(function (array $state): bool {
+                            return ! ($state['is_billed'] ?? false);
+                        }),
+                ];
+            })
             ->action(function (array $data, array $arguments): void {
                 $clientId = $arguments['clientId'];
                 $date = $arguments['date'];
+
+                // Generate default description
+                $defaultDescription = Carbon::parse($date)->format('M j').' hours';
 
                 // Get existing entry IDs for this cell
                 $key = $clientId.'_'.$date;
@@ -148,30 +180,36 @@ class TimeTracking extends Page
                 $processedIds = [];
 
                 foreach ($data['entries'] as $entryData) {
-                    if (! empty($entryData['id'])) {
-                        // Update existing entry
-                        $entry = TimeEntry::find($entryData['id']);
+                    // Use default description if empty
+                    $description = ! empty($entryData['description'])
+                        ? $entryData['description']
+                        : $defaultDescription;
+
+                    $entryId = $entryData['id'] ?? null;
+
+                    if (is_numeric($entryId)) {
+                        $entry = TimeEntry::find($entryId);
                         if ($entry && ! $entry->is_billed) {
                             $entry->update([
-                                'description' => $entryData['description'],
+                                'description' => $description,
                                 'hours' => $entryData['hours'],
                             ]);
                         }
-                        $processedIds[] = $entryData['id'];
+                        $processedIds[] = $entryId;
                     } else {
-                        // Create new entry
                         $newEntry = TimeEntry::create([
                             'client_id' => $clientId,
                             'date' => $date,
-                            'description' => $entryData['description'],
+                            'description' => $description,
                             'hours' => $entryData['hours'],
                         ]);
+
                         $processedIds[] = $newEntry->id;
                     }
                 }
 
-                // Delete entries that were removed (only unbilled ones)
                 $entriesToDelete = array_diff($existingEntryIds, $processedIds);
+
                 TimeEntry::whereIn('id', $entriesToDelete)
                     ->whereNull('invoice_line_id')
                     ->delete();

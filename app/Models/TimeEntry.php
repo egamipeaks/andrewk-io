@@ -21,6 +21,11 @@ class TimeEntry extends Model
         'description',
     ];
 
+    protected $appends = [
+        'is_billed',
+        'value',
+    ];
+
     protected $casts = [
         'date' => 'date',
         'hours' => 'decimal:2',
