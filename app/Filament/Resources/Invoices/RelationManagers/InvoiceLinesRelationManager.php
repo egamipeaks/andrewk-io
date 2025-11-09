@@ -3,13 +3,16 @@
 namespace App\Filament\Resources\Invoices\RelationManagers;
 
 use App\Enums\InvoiceLineType;
+use Carbon\Carbon;
 use Filament\Actions;
 use Filament\Forms;
+use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Support\Collection;
 
 class InvoiceLinesRelationManager extends RelationManager
 {
@@ -183,6 +186,86 @@ class InvoiceLinesRelationManager extends RelationManager
             ])
             ->bulkActions([
                 Actions\DeleteBulkAction::make(),
+                Actions\BulkAction::make('mergeHourlyLines')
+                    ->label('Merge Hourly Lines')
+                    ->icon('heroicon-o-arrows-pointing-in')
+                    ->color('info')
+                    ->requiresConfirmation()
+                    ->modalHeading('Merge Hourly Lines')
+                    ->modalDescription(function (Collection $records) {
+                        $hourlyLines = $records->filter(fn ($record) => $record->type === InvoiceLineType::Hourly);
+
+                        if ($hourlyLines->count() < 2) {
+                            return 'Please select at least 2 hourly invoice lines to merge.';
+                        }
+
+                        $rateGroups = $hourlyLines->groupBy('hourly_rate');
+                        $groupCount = $rateGroups->count();
+
+                        if ($groupCount === 1) {
+                            return "This will merge {$hourlyLines->count()} hourly lines into 1 invoice line.";
+                        }
+
+                        return "This will merge {$hourlyLines->count()} hourly lines into {$groupCount} invoice lines (grouped by rate).";
+                    })
+                    ->modalSubmitActionLabel('Merge Lines')
+                    ->action(function (Collection $records) {
+                        $this->mergeHourlyLines($records);
+                    })
+                    ->deselectRecordsAfterCompletion(),
             ]);
+    }
+
+    protected function mergeHourlyLines(Collection $records): void
+    {
+        $hourlyLines = $records->filter(fn ($record) => $record->type === InvoiceLineType::Hourly);
+
+        if ($hourlyLines->count() < 2) {
+            Notification::make()
+                ->title('Cannot Merge')
+                ->body('Please select at least 2 hourly invoice lines to merge.')
+                ->warning()
+                ->send();
+
+            return;
+        }
+
+        $invoice = $this->getOwnerRecord();
+        $rateGroups = $hourlyLines->groupBy('hourly_rate');
+        $mergedLinesCreated = 0;
+        $totalLinesProcessed = 0;
+
+        foreach ($rateGroups as $rate => $lines) {
+            $totalHours = $lines->sum('hours');
+            $latestDate = $lines->max('date');
+            $firstOfMonth = Carbon::parse($latestDate)->startOfMonth();
+            $monthName = $firstOfMonth->format('F');
+
+            $mergedLine = $invoice->invoiceLines()->create([
+                'type' => InvoiceLineType::Hourly,
+                'description' => "Hours for {$monthName} (at {$rate}/hr)",
+                'date' => $firstOfMonth,
+                'hourly_rate' => $rate,
+                'hours' => $totalHours,
+            ]);
+
+            foreach ($lines as $line) {
+                $line->timeEntries()->update(['invoice_line_id' => $mergedLine->id]);
+                $line->delete();
+                $totalLinesProcessed++;
+            }
+
+            $mergedLinesCreated++;
+        }
+
+        $message = $mergedLinesCreated === 1
+            ? "Merged {$totalLinesProcessed} lines into 1 invoice line"
+            : "Merged {$totalLinesProcessed} lines into {$mergedLinesCreated} invoice lines (grouped by rate)";
+
+        Notification::make()
+            ->title('Lines Merged Successfully')
+            ->body($message)
+            ->success()
+            ->send();
     }
 }

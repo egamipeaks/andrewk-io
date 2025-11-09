@@ -14,32 +14,33 @@ class InvoiceForm
 {
     public static function configure(Schema $schema, bool $isCreating = false): Schema
     {
-        $components = [
-            Select::make('client_id')
-                ->relationship('client', 'name')
-                ->required()
-                ->live()
-                ->afterStateUpdated(function ($set, $state) {
-                    if ($state) {
-                        $client = Client::find($state);
-                        if ($client) {
-                            $set('currency', $client->currency->value);
+        return $schema
+            ->columns(2)
+            ->components([
+                Select::make('client_id')
+                    ->relationship('client', 'name')
+                    ->required()
+                    ->columnSpanFull()
+                    ->live()
+                    ->afterStateUpdated(function ($set, $state) {
+                        if ($state) {
+                            $client = Client::find($state);
+                            if ($client) {
+                                $set('currency', $client->currency->value);
+                            }
                         }
-                    }
-                }),
-            Select::make('currency')
-                ->options(Currency::class)
-                ->default(Currency::USD)
-                ->required(),
-            Toggle::make('paid')
-                ->required(),
-            DatePicker::make('due_date')
-                ->default(now()->addDays(15)->addMonth()->startOfMonth())
-                ->required(),
-            Textarea::make('note')
-                ->maxLength(65535),
-        ];
-
-        return $schema->components($components);
+                    }),
+                Select::make('currency')
+                    ->options(Currency::class)
+                    ->default(Currency::USD)
+                    ->required(),
+                DatePicker::make('due_date')
+                    ->default(now()->addDays(15)->addMonth()->startOfMonth())
+                    ->required(),
+                Toggle::make('paid')
+                    ->required(),
+                Textarea::make('note')
+                    ->maxLength(65535),
+            ]);
     }
 }

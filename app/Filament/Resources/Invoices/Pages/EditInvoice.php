@@ -146,5 +146,7 @@ class EditInvoice extends EditRecord
             ->body("Imported {$timeEntries->count()} time entries as invoice lines")
             ->success()
             ->send();
+
+        $this->redirect($this->getResource()::getUrl('edit', ['record' => $this->record]));
     }
 }
