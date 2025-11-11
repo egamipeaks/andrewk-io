@@ -27,7 +27,7 @@ class InvoicesTable
                         default => 'gray',
                     }),
                 TextColumn::make('total')
-                    ->formatStateUsing(fn ($record): string => $record->formattedTotal()),
+                    ->formatStateUsing(fn ($record): string => $record->formattedTotalUsd()),
                 TextColumn::make('total_hours')
                     ->label('Hours')
                     ->numeric(decimalPlaces: 1),

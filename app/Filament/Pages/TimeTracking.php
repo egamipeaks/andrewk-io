@@ -6,10 +6,10 @@ use App\Models\Client;
 use App\Models\TimeEntry;
 use Carbon\Carbon;
 use Filament\Actions\Action;
-use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Repeater\TableColumn;
 use Filament\Forms\Components\TextInput;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Utilities\Get;
@@ -133,7 +133,7 @@ class TimeTracking extends Page
                     $formEntries = [
                         [
                             'description' => '',
-                            'hours' => null,
+                            'hours' => 1,
                             'is_billed' => false,
                         ],
                     ];
@@ -171,9 +171,9 @@ class TimeTracking extends Page
                                 ->placeholder($placeholder)
                                 ->maxLength(1000)
                                 ->disabled(fn (Get $get): bool => $get('is_billed') ?? false),
-                            Placeholder::make('billed')
+                            TextEntry::make('billed')
                                 ->hiddenLabel()
-                                ->content(function (Get $get): ?HtmlString {
+                                ->state(function (Get $get): ?HtmlString {
                                     if (! ($get('is_billed') ?? false)) {
                                         return null;
                                     }
@@ -308,7 +308,8 @@ class TimeTracking extends Page
         $total = 0;
 
         foreach ($this->clients as $client) {
-            $total += $this->getTotalRevenueForClient($client->id);
+            $revenue = $this->getTotalRevenueForClient($client->id);
+            $total += $client->currency->toUsd($revenue);
         }
 
         return $total;

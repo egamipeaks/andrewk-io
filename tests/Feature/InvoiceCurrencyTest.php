@@ -73,6 +73,53 @@ describe('Invoice Currency Model', function () {
 
         expect($invoice->formattedTotal())->toBe('C$1,500.50');
     });
+
+    it('converts USD invoice total to USD without change', function () {
+        $invoice = Invoice::factory()->create([
+            'client_id' => $this->client->id,
+            'currency' => Currency::USD,
+        ]);
+
+        InvoiceLine::factory()->create([
+            'invoice_id' => $invoice->id,
+            'amount' => 1000.00,
+        ]);
+
+        expect($invoice->totalUsd())->toBe(1000.0);
+        expect($invoice->formattedTotalUsd())->toBe('$1,000');
+    });
+
+    it('converts CAD invoice total to USD', function () {
+        $invoice = Invoice::factory()->create([
+            'client_id' => $this->client->id,
+            'currency' => Currency::CAD,
+        ]);
+
+        InvoiceLine::factory()->create([
+            'invoice_id' => $invoice->id,
+            'amount' => 1000.00,
+        ]);
+
+        // 1000 CAD × 0.71 = 710 USD
+        expect($invoice->totalUsd())->toBe(710.0);
+        expect($invoice->formattedTotalUsd())->toBe('$710');
+    });
+
+    it('converts CAD invoice with decimal total to USD', function () {
+        $invoice = Invoice::factory()->create([
+            'client_id' => $this->client->id,
+            'currency' => Currency::CAD,
+        ]);
+
+        InvoiceLine::factory()->create([
+            'invoice_id' => $invoice->id,
+            'amount' => 1500.50,
+        ]);
+
+        // 1500.50 CAD × 0.71 = 1065.355 → rounds to 1065.36 USD
+        expect($invoice->totalUsd())->toBe(1065.36);
+        expect($invoice->formattedTotalUsd())->toBe('$1,065.36');
+    });
 });
 
 describe('Invoice Line Currency Formatting', function () {

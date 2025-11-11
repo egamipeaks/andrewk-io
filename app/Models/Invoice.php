@@ -57,6 +57,18 @@ class Invoice extends Model
         return $currency->format($this->total);
     }
 
+    public function totalUsd(): float
+    {
+        $currency = $this->currency ?? Currency::USD;
+
+        return $currency->toUsd($this->total);
+    }
+
+    public function formattedTotalUsd(): string
+    {
+        return Currency::USD->format($this->totalUsd());
+    }
+
     public function emailSends(): HasMany
     {
         return $this->hasMany(InvoiceEmailSend::class);

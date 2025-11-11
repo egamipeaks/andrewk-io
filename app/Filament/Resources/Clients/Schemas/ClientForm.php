@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Clients\Schemas;
 
 use App\Enums\Currency;
 use Filament\Forms;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 
 class ClientForm
@@ -27,11 +28,24 @@ class ClientForm
             Forms\Components\Select::make('currency')
                 ->options(Currency::class)
                 ->default(Currency::USD)
-                ->required(),
+                ->required()
+                ->live(),
             Forms\Components\TextInput::make('hourly_rate')
                 ->label('Hourly Rate')
                 ->numeric()
-                ->prefix('$')
+                ->prefix(function (Get $get) {
+                    $currency = $get('currency');
+
+                    if (empty($currency)) {
+                        return '$';
+                    }
+
+                    if (! $currency instanceof Currency) {
+                        $currency = Currency::tryFrom($currency);
+                    }
+
+                    return $currency?->symbol() ?? '$';
+                })
                 ->step(0.01)
                 ->placeholder('150.00'),
         ];

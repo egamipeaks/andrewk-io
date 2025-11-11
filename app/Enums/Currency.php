@@ -27,4 +27,17 @@ enum Currency: string
     {
         return $this->symbol().number_format($amount, fmod($amount, 1) ? 2 : 0);
     }
+
+    public function toUsdRate(): float
+    {
+        return match ($this) {
+            self::USD => 1.0,
+            self::CAD => 0.71,
+        };
+    }
+
+    public function toUsd(float $amount): float
+    {
+        return round($amount * $this->toUsdRate(), 2);
+    }
 }
