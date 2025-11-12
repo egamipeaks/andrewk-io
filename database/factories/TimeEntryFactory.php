@@ -22,7 +22,7 @@ class TimeEntryFactory extends Factory
             'client_id' => Client::factory(),
             'invoice_line_id' => null,
             'date' => fake()->dateTimeBetween('-3 months', 'now'),
-            'hours' => fake()->randomFloat(2, 0.5, 12),
+            'hours' => fake()->randomFloat(2, 0.5, 10),
             'description' => fake()->sentence(),
         ];
     }
@@ -38,6 +38,30 @@ class TimeEntryFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'invoice_line_id' => null,
+        ]);
+    }
+
+    public function currentMonth(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'date' => fake()->dateTimeBetween(now()->startOfMonth(), now()),
+        ]);
+    }
+
+    public function lastMonth(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'date' => fake()->dateTimeBetween(
+                now()->subMonth()->startOfMonth(),
+                now()->subMonth()->endOfMonth()
+            ),
+        ]);
+    }
+
+    public function older(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'date' => fake()->dateTimeBetween('-4 months', '-2 months'),
         ]);
     }
 }

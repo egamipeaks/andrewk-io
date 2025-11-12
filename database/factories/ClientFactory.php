@@ -20,7 +20,21 @@ class ClientFactory extends Factory
             'name' => fake()->company(),
             'email' => fake()->unique()->companyEmail(),
             'currency' => fake()->randomElement(['USD', 'CAD']),
-            'hourly_rate' => fake()->randomFloat(2, 50, 250), // Between $50-$250/hour
+            'hourly_rate' => fake()->randomFloat(2, 80, 150),
         ];
+    }
+
+    public function withoutHourlyRate(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'hourly_rate' => null,
+        ]);
+    }
+
+    public function withHourlyRate(float $min = 80, float $max = 150): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'hourly_rate' => fake()->randomFloat(2, $min, $max),
+        ]);
     }
 }

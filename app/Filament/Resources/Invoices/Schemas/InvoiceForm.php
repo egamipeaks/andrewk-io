@@ -7,6 +7,7 @@ use App\Models\Client;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 
@@ -23,17 +24,53 @@ class InvoiceForm
                     ->columnSpanFull()
                     ->live()
                     ->afterStateUpdated(function ($set, $state) {
-                        if ($state) {
-                            $client = Client::find($state);
-                            if ($client) {
-                                $set('currency', $client->currency->value);
-                            }
+                        if (! $state) {
+                            return;
                         }
+
+                        if (! $client = Client::find($state)) {
+                            return;
+                        }
+
+                        $currency = $client->currency;
+                        $set('currency', $currency->value);
+                        $set('conversion_rate', $currency->fromUsdRate());
                     }),
                 Select::make('currency')
                     ->options(Currency::class)
-                    ->default(Currency::USD)
+                    ->live()
+                    ->afterStateUpdated(function ($set, $state) {
+                        if (! $state) {
+                            return;
+                        }
+
+                        $currency = $state;
+                        $set('currency', $currency->value);
+                        $set('conversion_rate', $currency->fromUsdRate());
+                    })
                     ->required(),
+                TextInput::make('conversion_rate')
+                    ->label('Conversion Rate (USD to Client Currency)')
+                    ->numeric()
+                    ->hidden(function ($get) {
+                        /** @var Currency $currency */
+                        $currency = $get('currency');
+
+                        if (! $currency) {
+                            return true;
+                        }
+
+                        return $currency->isUsd();
+                    })
+                    ->disabled(function ($state, $record) {
+                        if (! $record) {
+                            return false;
+                        }
+
+                        return $record->isSent() || $record->isPaid();
+                    })
+                    ->step(0.000001)
+                    ->helperText('Locked at invoice creation. Shows how USD amounts convert to client currency.'),
                 DatePicker::make('due_date')
                     ->default(now()->addDays(15)->addMonth()->startOfMonth())
                     ->required(),

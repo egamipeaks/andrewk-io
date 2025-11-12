@@ -17,6 +17,7 @@ class Invoice extends Model
         'client_id',
         'paid',
         'currency',
+        'conversion_rate',
         'due_date',
         'note',
     ];
@@ -24,6 +25,7 @@ class Invoice extends Model
     protected $casts = [
         'due_date' => 'date',
         'currency' => Currency::class,
+        'conversion_rate' => 'float',
     ];
 
     protected $attributes = [
@@ -50,23 +52,45 @@ class Invoice extends Model
         return $this->invoiceLines->sum('hours');
     }
 
+    public function totalInClientCurrency(): float
+    {
+        $rate = $this->conversion_rate ?? $this->currency->fromUsdRate();
+
+        return round($this->total * $rate, 2);
+    }
+
     public function formattedTotal(): string
     {
         $currency = $this->currency ?? Currency::USD;
 
-        return $currency->format($this->total);
+        return $currency->format($this->totalInClientCurrency());
+    }
+
+    public function formattedTotalInClientCurrency(): string
+    {
+        $currency = $this->currency ?? Currency::USD;
+
+        return $currency->format($this->totalInClientCurrency());
     }
 
     public function totalUsd(): float
     {
-        $currency = $this->currency ?? Currency::USD;
-
-        return $currency->toUsd($this->total);
+        return $this->total;
     }
 
     public function formattedTotalUsd(): string
     {
         return Currency::USD->format($this->totalUsd());
+    }
+
+    public function isSent(): bool
+    {
+        return $this->emailSends()->exists();
+    }
+
+    public function isPaid(): bool
+    {
+        return $this->paid;
     }
 
     public function emailSends(): HasMany

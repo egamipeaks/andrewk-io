@@ -60,20 +60,22 @@ class InvoiceLinesRelationManager extends RelationManager
                     ->required()
                     ->columnSpanFull(),
                 Forms\Components\TextInput::make('amount')
-                    ->label('Amount')
+                    ->label('Amount (USD)')
                     ->numeric()
                     ->prefix('$')
                     ->step(0.01)
+                    ->helperText('Amount stored in USD, will display in client currency on invoice.')
                     ->required()
                     ->visible(fn (Get $get): bool => $get('type') === InvoiceLineType::Fixed->value),
                 Forms\Components\TextInput::make('hourly_rate')
-                    ->label('Hourly Rate')
+                    ->label('Hourly Rate (USD)')
                     ->numeric()
                     ->prefix('$')
                     ->step(0.01)
                     ->default(function ($livewire) {
                         return $livewire->getOwnerRecord()->client->hourly_rate ?? null;
                     })
+                    ->helperText('Rate stored in USD, will display in client currency on invoice.')
                     ->required()
                     ->visible(fn (Get $get): bool => $get('type') === InvoiceLineType::Hourly->value),
                 Forms\Components\TextInput::make('hours')

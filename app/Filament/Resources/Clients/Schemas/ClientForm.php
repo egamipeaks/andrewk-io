@@ -4,7 +4,6 @@ namespace App\Filament\Resources\Clients\Schemas;
 
 use App\Enums\Currency;
 use Filament\Forms;
-use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 
 class ClientForm
@@ -31,23 +30,12 @@ class ClientForm
                 ->required()
                 ->live(),
             Forms\Components\TextInput::make('hourly_rate')
-                ->label('Hourly Rate')
+                ->label('Hourly Rate (USD)')
                 ->numeric()
-                ->prefix(function (Get $get) {
-                    $currency = $get('currency');
-
-                    if (empty($currency)) {
-                        return '$';
-                    }
-
-                    if (! $currency instanceof Currency) {
-                        $currency = Currency::tryFrom($currency);
-                    }
-
-                    return $currency?->symbol() ?? '$';
-                })
+                ->prefix('$')
                 ->step(0.01)
-                ->placeholder('150.00'),
+                ->placeholder('100.00')
+                ->helperText('All hourly rates are stored in USD. Invoices will be sent in the client\'s preferred currency using the current exchange rate.'),
         ];
 
         return $schema->components($components);

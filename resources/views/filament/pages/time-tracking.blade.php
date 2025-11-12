@@ -30,9 +30,6 @@
                 <div class="text-2xl font-bold dark:text-white">
                     {{ number_format($this->getGrandTotalRevenue(), 2) }}
                 </div>
-                @if ($clients->pluck('currency')->unique()->count() > 1)
-                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">Mixed currencies</div>
-                @endif
             </div>
         </div>
 

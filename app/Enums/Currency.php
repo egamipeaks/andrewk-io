@@ -7,6 +7,11 @@ enum Currency: string
     case USD = 'USD';
     case CAD = 'CAD';
 
+    public function isUsd(): bool
+    {
+        return $this === self::USD;
+    }
+
     public function symbol(): string
     {
         return match ($this) {
@@ -39,5 +44,22 @@ enum Currency: string
     public function toUsd(float $amount): float
     {
         return round($amount * $this->toUsdRate(), 2);
+    }
+
+    public function fromUsdRate(): float
+    {
+        $toUsdRate = $this->toUsdRate();
+
+        $rate = match ($this) {
+            self::USD => 1.0,
+            self::CAD => 1.0 / $toUsdRate,
+        };
+
+        return round($rate, 3);
+    }
+
+    public function fromUsd(float $amountInUsd): float
+    {
+        return round($amountInUsd * $this->fromUsdRate(), 2);
     }
 }

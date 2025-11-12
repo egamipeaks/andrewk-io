@@ -53,11 +53,40 @@ class InvoiceLine extends Model
         return 0;
     }
 
+    public function subtotalInClientCurrency(): float
+    {
+        $rate = $this->invoice->conversion_rate ?? $this->invoice->currency->fromUsdRate();
+
+        return round($this->subtotal * $rate, 2);
+    }
+
+    public function hourlyRateInClientCurrency(): float
+    {
+        if (! $this->hourly_rate) {
+            return 0;
+        }
+
+        $rate = $this->invoice->conversion_rate ?? $this->invoice->currency->fromUsdRate();
+
+        return round($this->hourly_rate * $rate, 2);
+    }
+
+    public function amountInClientCurrency(): float
+    {
+        if (! $this->amount) {
+            return 0;
+        }
+
+        $rate = $this->invoice->conversion_rate ?? $this->invoice->currency->fromUsdRate();
+
+        return round($this->amount * $rate, 2);
+    }
+
     public function formattedSubTotal(): string
     {
         $currency = $this->invoice->currency ?? Currency::USD;
 
-        return $currency->format($this->subtotal);
+        return $currency->format($this->subtotalInClientCurrency());
     }
 
     public function formattedHourlyRate(): string
@@ -67,6 +96,6 @@ class InvoiceLine extends Model
         }
         $currency = $this->invoice->currency ?? Currency::USD;
 
-        return $currency->format($this->hourly_rate);
+        return $currency->format($this->hourlyRateInClientCurrency());
     }
 }
