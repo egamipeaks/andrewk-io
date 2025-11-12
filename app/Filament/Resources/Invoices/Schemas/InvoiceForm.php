@@ -39,6 +39,12 @@ class InvoiceForm
                 Select::make('currency')
                     ->options(Currency::class)
                     ->live()
+                    ->columnSpan(function ($get) {
+                        /** @var Currency $currency */
+                        $currency = $get('currency');
+
+                        return $currency && $currency->isUsd() ? 2 : 1;
+                    })
                     ->afterStateUpdated(function ($set, $state) {
                         if (! $state) {
                             return;
@@ -70,7 +76,7 @@ class InvoiceForm
                         return $record->isSent() || $record->isPaid();
                     })
                     ->step(0.000001)
-                    ->helperText('Locked at invoice creation. Shows how USD amounts convert to client currency.'),
+                    ->helperText('Locked at invoice send or paid. Shows how USD amounts convert to client currency.'),
                 DatePicker::make('due_date')
                     ->default(now()->addDays(15)->addMonth()->startOfMonth())
                     ->required(),
@@ -78,6 +84,10 @@ class InvoiceForm
                     ->required(),
                 Textarea::make('note')
                     ->maxLength(65535),
+                TextInput::make('total')
+                    ->disabled()
+                    ->formatStateUsing(fn ($record) => $record?->formattedTotalUsd())
+                    ->label('Total (USD)'),
             ]);
     }
 }
