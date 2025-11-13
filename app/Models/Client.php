@@ -39,6 +39,11 @@ class Client extends Model
         return $this->hasMany(TimeEntry::class);
     }
 
+    public function formattedHourlyRate(): string
+    {
+        return Currency::USD->format($this->hourly_rate);
+    }
+
     public function shortName(): string
     {
         $words = preg_split('/\s+/', trim($this->name));

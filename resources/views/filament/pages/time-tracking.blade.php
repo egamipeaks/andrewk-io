@@ -45,7 +45,7 @@
                             <th class="px-3 py-2 text-center font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 border-r border-gray-300 dark:border-gray-700 whitespace-nowrap w-24" title="{{ $client->name }}">
                                 <div>{{ $client->shortName() }}</div>
                                 <div class="text-xs text-gray-500 dark:text-gray-400 font-normal">
-                                    {{ $client->currency->symbol() }}{{ number_format($client->hourly_rate, 2) }}/hr
+                                    {{ $client->formattedHourlyRate() }} / hr
                                 </div>
                             </th>
                         @endforeach
@@ -103,7 +103,7 @@
                             <td class="px-3 py-2 border-r border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 whitespace-nowrap text-center w-24">
                                 <div>{{ number_format($this->getTotalHoursForClient($client->id), 2) }} hrs</div>
                                 <div class="text-xs text-gray-500 dark:text-gray-400 font-normal">
-                                    {{ $client->currency->symbol() }}{{ number_format($this->getTotalRevenueForClient($client->id), 2) }}
+                                    {{ $this->getFormattedTotalRevenueForClient($client->id) }}
                                 </div>
                             </td>
                         @endforeach

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Enums\Currency;
 use App\Models\Client;
 use App\Models\TimeEntry;
 use Carbon\Carbon;
@@ -297,6 +298,19 @@ class TimeTracking extends Page
         }
 
         return $this->getTotalHoursForClient($clientId) * $client->hourly_rate;
+    }
+
+    public function getFormattedTotalRevenueForClient(string $clientId): string
+    {
+        $client = $this->clients->firstWhere('id', $clientId);
+
+        if (! $client) {
+            return '';
+        }
+
+        $revenue = $this->getTotalRevenueForClient($clientId);
+
+        return Currency::USD->format($revenue);
     }
 
     public function getGrandTotalHours(): float
