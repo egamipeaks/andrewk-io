@@ -68,13 +68,13 @@ class InvoiceForm
 
                         return $currency->isUsd();
                     })
-//                    ->disabled(function ($state, $record) {
-//                        if (! $record) {
-//                            return false;
-//                        }
-//
-//                        return $record->isSent() || $record->isPaid();
-//                    })
+                    ->disabled(function ($state, $record) {
+                        if (! $record) {
+                            return false;
+                        }
+
+                        return $record->isSent() || $record->isPaid();
+                    })
                     ->step(0.000001)
                     ->helperText('Locked at invoice send or paid. Shows how USD amounts convert to client currency.'),
                 DatePicker::make('due_date')
