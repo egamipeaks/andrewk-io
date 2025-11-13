@@ -51,6 +51,6 @@ class InvoiceResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->orderBy('id', 'desc');
+        return parent::getEloquentQuery();
     }
 }

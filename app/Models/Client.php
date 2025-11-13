@@ -17,10 +17,12 @@ class Client extends Model
         'email_from',
         'currency',
         'hourly_rate',
+        'is_active',
     ];
 
     protected $casts = [
         'currency' => Currency::class,
+        'is_active' => 'boolean',
     ];
 
     protected $attributes = [

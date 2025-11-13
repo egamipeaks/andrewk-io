@@ -15,6 +15,7 @@ class InvoicesTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->defaultSort('due_date', 'desc')
             ->columns([
                 TextColumn::make('client.name')
                     ->label('Client'),
@@ -32,7 +33,12 @@ class InvoicesTable
                     ->label('Hours')
                     ->numeric(decimalPlaces: 1),
                 TextColumn::make('due_date')
+                    ->sortable()
                     ->date(),
+                IconColumn::make('sent')
+                    ->label('Sent')
+                    ->boolean()
+                    ->getStateUsing(fn ($record): bool => $record->isSent()),
                 IconColumn::make('paid')
                     ->boolean(),
             ])

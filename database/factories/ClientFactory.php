@@ -21,6 +21,7 @@ class ClientFactory extends Factory
             'email' => fake()->unique()->companyEmail(),
             'currency' => fake()->randomElement(['USD', 'CAD']),
             'hourly_rate' => fake()->randomFloat(2, 80, 150),
+            'is_active' => true,
         ];
     }
 
@@ -35,6 +36,13 @@ class ClientFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'hourly_rate' => fake()->randomFloat(2, $min, $max),
+        ]);
+    }
+
+    public function inactive(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_active' => false,
         ]);
     }
 }

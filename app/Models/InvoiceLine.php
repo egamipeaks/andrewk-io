@@ -98,4 +98,14 @@ class InvoiceLine extends Model
 
         return $currency->format($this->hourlyRateInClientCurrency());
     }
+
+    public function scopeHourly($query)
+    {
+        return $query->where('type', InvoiceLineType::Hourly);
+    }
+
+    public function scopeFixed($query)
+    {
+        return $query->where('type', InvoiceLineType::Fixed);
+    }
 }

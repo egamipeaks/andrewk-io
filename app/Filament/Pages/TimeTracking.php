@@ -64,6 +64,7 @@ class TimeTracking extends Page
     public function loadData(): void
     {
         $this->clients = Client::query()
+            ->where('is_active', true)
             ->whereNotNull('hourly_rate')
             ->where('hourly_rate', '>', 0)
             ->orderBy('name')

@@ -43,6 +43,7 @@ describe('Invoice Model Email Methods', function () {
 
         assertDatabaseHas('invoice_email_sends', [
             'invoice_id' => $this->invoice->id,
+            'email' => $this->client->email,
         ]);
     });
 
@@ -59,9 +60,8 @@ describe('Invoice Model Email Methods', function () {
                    $mail->invoice->id === $this->invoice->id;
         });
 
-        assertDatabaseHas('invoice_email_sends', [
-            'invoice_id' => $this->invoice->id,
-        ]);
+        // Test emails should NOT create email send records
+        assertDatabaseCount('invoice_email_sends', 0);
     });
 
     it('creates email send record when sending invoice email', function () {
@@ -77,7 +77,7 @@ describe('Invoice Model Email Methods', function () {
         ]);
     });
 
-    it('creates email send record when sending test email', function () {
+    it('does not create email send record when sending test email', function () {
         Mail::fake();
         config(['mail.admin_email' => 'test-admin@example.com']);
 
@@ -85,10 +85,8 @@ describe('Invoice Model Email Methods', function () {
 
         $this->invoice->sendTestEmail();
 
-        assertDatabaseCount('invoice_email_sends', 1);
-        assertDatabaseHas('invoice_email_sends', [
-            'invoice_id' => $this->invoice->id,
-        ]);
+        // Test emails should NOT create records (they're just for preview)
+        assertDatabaseCount('invoice_email_sends', 0);
     });
 });
 
@@ -127,9 +125,8 @@ describe('Filament EditInvoice Page Actions', function () {
             return $mail->hasTo('test-admin@example.com');
         });
 
-        assertDatabaseHas('invoice_email_sends', [
-            'invoice_id' => $this->invoice->id,
-        ]);
+        // Test emails should NOT create email send records
+        assertDatabaseCount('invoice_email_sends', 0);
     });
 
     it('shows correct admin email when sending test email', function () {
@@ -226,7 +223,9 @@ describe('Integration Tests', function () {
         $this->invoice->sendTestEmail();
 
         Mail::assertSentCount(3);
-        assertDatabaseCount('invoice_email_sends', 3);
+
+        // Test emails should NOT create records
+        assertDatabaseCount('invoice_email_sends', 0);
     });
 
     it('can send both regular and test emails for the same invoice', function () {
@@ -246,6 +245,11 @@ describe('Integration Tests', function () {
             return $mail->hasTo('test-admin@example.com');
         });
 
-        assertDatabaseCount('invoice_email_sends', 2);
+        // Only the real email should create a record, not the test email
+        assertDatabaseCount('invoice_email_sends', 1);
+        assertDatabaseHas('invoice_email_sends', [
+            'invoice_id' => $this->invoice->id,
+            'email' => $this->client->email,
+        ]);
     });
 });

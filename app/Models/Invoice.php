@@ -100,9 +100,12 @@ class Invoice extends Model
 
     public function sendInvoiceEmail()
     {
-        Mail::to($this->client->email)->send(new InvoiceEmail($this));
+        $clientEmail = $this->client->email;
+
+        Mail::to($clientEmail)->send(new InvoiceEmail($this));
 
         $this->emailSends()->create([
+            'email' => $clientEmail,
             'sent_at' => now(),
         ]);
     }
@@ -111,9 +114,5 @@ class Invoice extends Model
     {
         $adminEmail = config('mail.admin_email');
         Mail::to($adminEmail)->send(new InvoiceEmail($this));
-
-        $this->emailSends()->create([
-            'sent_at' => now(),
-        ]);
     }
 }

@@ -17,6 +17,7 @@ class InvoiceEmailSend extends Model
 
     protected $fillable = [
         'invoice_id',
+        'email',
         'sent_at',
     ];
 

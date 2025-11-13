@@ -28,7 +28,14 @@ class InvoiceEmailSendsRelationManager extends RelationManager
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('sent_at'),
+                Tables\Columns\TextColumn::make('email')
+                    ->label('Email Address')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('sent_at')
+                    ->label('Sent At')
+                    ->dateTime()
+                    ->sortable(),
             ])
             ->filters([
                 //

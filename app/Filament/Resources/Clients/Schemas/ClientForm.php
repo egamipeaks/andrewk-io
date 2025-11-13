@@ -36,6 +36,11 @@ class ClientForm
                 ->step(0.01)
                 ->placeholder('100.00')
                 ->helperText('All hourly rates are stored in USD. Invoices will be sent in the client\'s preferred currency using the current exchange rate.'),
+            Forms\Components\Toggle::make('is_active')
+                ->label('Active')
+                ->default(true)
+                ->inline(false)
+                ->helperText('Inactive clients won\'t appear on the Time Tracking page.'),
         ];
 
         return $schema->components($components);
