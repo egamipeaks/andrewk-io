@@ -162,8 +162,8 @@ class TimeTracking extends Page
                                 ->label('Hours')
                                 ->required()
                                 ->numeric()
-                                ->step(1)
-                                ->minValue(1)
+                                ->step(.5)
+                                ->minValue(.5)
                                 ->maxValue(24)
                                 ->suffix('hrs')
                                 ->disabled(fn (Get $get): bool => $get('is_billed') ?? false),
