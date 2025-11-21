@@ -2,14 +2,26 @@
     <div class="space-y-6">
         {{-- Month Navigation --}}
         <div class="flex items-center justify-between">
-            <x-filament::button wire:click="previousMonth" color="gray" size="sm">
+            <x-filament::button
+                wire:click="previousMonth"
+                color="gray"
+                size="sm"
+                :disabled="!$this->canGoToPreviousMonth()"
+            >
                 <x-heroicon-o-chevron-left class="w-4 h-4" />
                 Previous
             </x-filament::button>
 
-            <h2 class="text-xl font-semibold dark:text-white">
-                {{ $this->getMonthName() }}
-            </h2>
+            <div class="text-center">
+                @if($viewMode === 'projection')
+                    <div class="text-xs text-amber-600 dark:text-amber-400 font-medium uppercase tracking-wide mb-1">
+                        Projection Mode
+                    </div>
+                @endif
+                <h2 class="text-xl font-semibold dark:text-white">
+                    {{ $this->getMonthName() }}
+                </h2>
+            </div>
 
             <x-filament::button wire:click="nextMonth" color="gray" size="sm">
                 Next
@@ -20,15 +32,35 @@
         {{-- Summary Statistics --}}
         <div class="grid grid-cols-2 gap-4">
             <div class="p-4 rounded-lg bg-white dark:bg-gray-800 shadow">
-                <div class="text-sm text-gray-500 dark:text-gray-400">Total Hours</div>
+                <div class="text-sm text-gray-500 dark:text-gray-400">
+                    @if($viewMode === 'projection')
+                        Projected Hours
+                    @else
+                        Total Hours
+                    @endif
+                </div>
                 <div class="text-2xl font-bold dark:text-white">
-                    {{ number_format($this->getGrandTotalHours(), 2) }}
+                    @if($viewMode === 'projection')
+                        {{ number_format($this->getGrandTotalProjectedHours(), 2) }}
+                    @else
+                        {{ number_format($this->getGrandTotalHours(), 2) }}
+                    @endif
                 </div>
             </div>
             <div class="p-4 rounded-lg bg-white dark:bg-gray-800 shadow">
-                <div class="text-sm text-gray-500 dark:text-gray-400">Total Revenue</div>
+                <div class="text-sm text-gray-500 dark:text-gray-400">
+                    @if($viewMode === 'projection')
+                        Projected Revenue
+                    @else
+                        Total Revenue
+                    @endif
+                </div>
                 <div class="text-2xl font-bold dark:text-white">
-                    {{ number_format($this->getGrandTotalRevenue(), 2) }}
+                    @if($viewMode === 'projection')
+                        {{ number_format($this->getGrandTotalProjectedRevenue(), 2) }}
+                    @else
+                        {{ number_format($this->getGrandTotalRevenue(), 2) }}
+                    @endif
                 </div>
             </div>
         </div>
@@ -67,28 +99,49 @@
                                 @php
                                     $cellData = $this->getHoursForCell($client->id, $day);
                                     $date = $currentDate->format('Y-m-d');
+                                    $key = $client->id . '_' . $date;
+                                    $projectedHours = $this->getProjectedHoursForCell($client->id, $day);
                                 @endphp
                                 <td class="border-r border-gray-200 dark:border-gray-800 w-24">
-                                    @if ($cellData)
-{{--                                        {{ ($this->editCellAction)(['clientId' => $client->id, 'date' => $date]) }}--}}
-                                        <div
-                                            wire:click="mountAction('editCell', { clientId: '{{ $client->id }}', date: '{{ $date }}' })"
-                                            class="cursor-pointer w-full text-center px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors
-                                                {{ $cellData['is_billed'] ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300' : 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300' }}"
-                                        >
-                                            <div class="font-semibold">{{ number_format($cellData['total_hours'], 2) }}</div>
-                                            <div class="text-xs opacity-75">
-                                                {{ $client->currency->symbol() }}{{ number_format($cellData['total_hours'] * $client->hourly_rate, 2) }}
-                                            </div>
+                                    @if($viewMode === 'projection')
+                                        {{-- Projection Mode: Show input --}}
+                                        <div class="px-2 py-1">
+                                            <input
+                                                type="number"
+                                                step="0.5"
+                                                min="0"
+                                                wire:model.lazy="projectedHours.{{ $key }}"
+                                                wire:change="saveProjectedEntry({{ $client->id }}, '{{ $date }}')"
+                                                placeholder="0"
+                                                class="w-full text-center border-0 bg-transparent focus:bg-amber-50 dark:focus:bg-amber-900/20 focus:ring-2 focus:ring-amber-500 dark:focus:ring-amber-400 rounded px-1 py-1 text-sm"
+                                            />
+                                            @if($projectedHours)
+                                                <div class="text-xs text-center text-gray-500 dark:text-gray-400 mt-1">
+                                                    {{ $client->currency->symbol() }}{{ number_format($projectedHours * $client->hourly_rate, 2) }}
+                                                </div>
+                                            @endif
                                         </div>
                                     @else
-{{--                                        {{ ($this->editCellAction)(['clientId' => $client->id, 'date' => $date]) }}--}}
-                                        <div
-                                            wire:click="mountAction('editCell', { clientId: '{{ $client->id }}', date: '{{ $date }}' })"
-                                            class="cursor-pointer w-full text-center text-gray-400 dark:text-gray-600 hover:text-gray-600 dark:hover:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 py-2 rounded transition-colors"
-                                        >
-                                            --
-                                        </div>
+                                        {{-- Actual Mode: Show clickable cell --}}
+                                        @if ($cellData)
+                                            <div
+                                                wire:click="mountAction('editCell', { clientId: '{{ $client->id }}', date: '{{ $date }}' })"
+                                                class="cursor-pointer w-full text-center px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors
+                                                    {{ $cellData['is_billed'] ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300' : 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300' }}"
+                                            >
+                                                <div class="font-semibold">{{ number_format($cellData['total_hours'], 2) }}</div>
+                                                <div class="text-xs opacity-75">
+                                                    {{ $client->currency->symbol() }}{{ number_format($cellData['total_hours'] * $client->hourly_rate, 2) }}
+                                                </div>
+                                            </div>
+                                        @else
+                                            <div
+                                                wire:click="mountAction('editCell', { clientId: '{{ $client->id }}', date: '{{ $date }}' })"
+                                                class="cursor-pointer w-full text-center text-gray-400 dark:text-gray-600 hover:text-gray-600 dark:hover:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 py-2 rounded transition-colors"
+                                            >
+                                                --
+                                            </div>
+                                        @endif
                                     @endif
                                 </td>
                             @endforeach
@@ -101,10 +154,17 @@
                         </td>
                         @foreach ($clients as $client)
                             <td class="px-3 py-2 border-r border-gray-200 dark:border-gray-800 text-gray-700 dark:text-gray-300 whitespace-nowrap text-center w-24">
-                                <div>{{ number_format($this->getTotalHoursForClient($client->id), 2) }} hrs</div>
-                                <div class="text-xs text-gray-500 dark:text-gray-400 font-normal">
-                                    {{ $this->getFormattedTotalRevenueForClient($client->id) }}
-                                </div>
+                                @if($viewMode === 'projection')
+                                    <div>{{ number_format($this->getTotalProjectedHoursForClient($client->id), 2) }} hrs</div>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 font-normal">
+                                        {{ $this->getFormattedTotalProjectedRevenueForClient($client->id) }}
+                                    </div>
+                                @else
+                                    <div>{{ number_format($this->getTotalHoursForClient($client->id), 2) }} hrs</div>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 font-normal">
+                                        {{ $this->getFormattedTotalRevenueForClient($client->id) }}
+                                    </div>
+                                @endif
                             </td>
                         @endforeach
                     </tr>
