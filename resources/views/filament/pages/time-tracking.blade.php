@@ -117,7 +117,7 @@
                                             />
                                             @if($projectedHours)
                                                 <div class="text-xs text-center text-gray-500 dark:text-gray-400 mt-1">
-                                                    {{ $client->currency->symbol() }}{{ number_format($projectedHours * $client->hourly_rate, 2) }}
+                                                    ${{ number_format($projectedHours * $client->hourly_rate, 2) }}
                                                 </div>
                                             @endif
                                         </div>
@@ -131,7 +131,7 @@
                                             >
                                                 <div class="font-semibold">{{ number_format($cellData['total_hours'], 2) }}</div>
                                                 <div class="text-xs opacity-75">
-                                                    {{ $client->currency->symbol() }}{{ number_format($cellData['total_hours'] * $client->hourly_rate, 2) }}
+                                                    ${{ number_format($cellData['total_hours'] * $client->hourly_rate, 2) }}
                                                 </div>
                                             </div>
                                         @else
