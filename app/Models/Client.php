@@ -39,6 +39,11 @@ class Client extends Model
         return $this->hasMany(TimeEntry::class);
     }
 
+    public function projectedEntries(): HasMany
+    {
+        return $this->hasMany(ProjectedEntry::class);
+    }
+
     public function formattedHourlyRate(): string
     {
         return Currency::USD->format($this->hourly_rate);

@@ -3,19 +3,15 @@
 namespace App\Filament\Pages;
 
 use App\Enums\Currency;
+use App\Filament\Pages\TimeTracking\Actions\EditCellActionBuilder;
 use App\Models\Client;
+use App\Models\ProjectedEntry;
 use App\Models\TimeEntry;
 use Carbon\Carbon;
 use Filament\Actions\Action;
-use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\Repeater\TableColumn;
-use Filament\Forms\Components\TextInput;
-use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
-use Filament\Schemas\Components\Utilities\Get;
 use Illuminate\Support\Collection;
-use Illuminate\Support\HtmlString;
 use Livewire\Attributes\Url;
 
 class TimeTracking extends Page
@@ -38,9 +34,16 @@ class TimeTracking extends Page
     #[Url]
     public int $month;
 
+    #[Url]
+    public string $viewMode = 'actual';
+
     public Collection $clients;
 
     public array $timeEntriesData = [];
+
+    public array $projectedEntriesData = [];
+
+    public array $projectedHours = [];
 
     public ?string $currentEditDate = null;
 
@@ -62,8 +65,38 @@ class TimeTracking extends Page
         return '';
     }
 
+    public function getHeaderActions(): array
+    {
+        return [
+            Action::make('timeTracking')
+                ->label('Time Tracking')
+                ->icon('heroicon-o-clock')
+                ->color($this->viewMode === 'actual' ? 'primary' : 'gray')
+                ->action(fn () => $this->switchViewMode('actual')),
+            Action::make('incomeProjection')
+                ->label('Income Projection')
+                ->icon('heroicon-o-chart-bar')
+                ->color($this->viewMode === 'projection' ? 'primary' : 'gray')
+                ->action(fn () => $this->switchViewMode('projection')),
+            Action::make('syncActuals')
+                ->label('Sync Actuals')
+                ->icon('heroicon-o-arrow-path')
+                ->color('success')
+                ->visible(fn () => $this->viewMode === 'projection'
+                    && $this->year == now()->year
+                    && $this->month == now()->month)
+                ->action(fn () => $this->syncActuals()),
+        ];
+    }
+
     public function loadData(): void
     {
+        if ($this->viewMode === 'projection') {
+            $this->loadProjectedData();
+
+            return;
+        }
+
         $this->clients = Client::query()
             ->where('is_active', true)
             ->whereNotNull('hourly_rate')
@@ -90,8 +123,71 @@ class TimeTracking extends Page
         })->toArray();
     }
 
+    public function loadProjectedData(): void
+    {
+        $this->clients = Client::query()
+            ->where('is_active', true)
+            ->whereNotNull('hourly_rate')
+            ->where('hourly_rate', '>', 0)
+            ->orderBy('name')
+            ->get();
+
+        $startDate = Carbon::create($this->year, $this->month, 1)->startOfMonth();
+        $endDate = $startDate->copy()->endOfMonth();
+        $today = now()->startOfDay();
+
+        $projectedEntries = ProjectedEntry::query()
+            ->whereIn('client_id', $this->clients->pluck('id'))
+            ->whereBetween('date', [$startDate, $endDate])
+            ->with('client')
+            ->get()
+            ->groupBy(fn (ProjectedEntry $entry) => $entry->client_id.'_'.$entry->date->format('Y-m-d'));
+
+        $this->projectedEntriesData = $projectedEntries->map(function (Collection $entries) {
+            return [
+                'total_hours' => $entries->sum('hours'),
+                'entries' => $entries->toArray(),
+            ];
+        })->toArray();
+
+        // Pre-fill projectedHours array for binding
+        $this->projectedHours = [];
+        foreach ($projectedEntries as $key => $entries) {
+            $this->projectedHours[$key] = $entries->sum('hours');
+        }
+
+        // For current month, pre-fill past days with actual time entry totals
+        if ($this->year == now()->year && $this->month == now()->month) {
+            $actualEntries = TimeEntry::query()
+                ->whereIn('client_id', $this->clients->pluck('id'))
+                ->whereBetween('date', [$startDate, $today])
+                ->get()
+                ->groupBy(fn (TimeEntry $entry) => $entry->client_id.'_'.$entry->date->format('Y-m-d'));
+
+            foreach ($actualEntries as $key => $entries) {
+                // Only pre-fill if no projection exists
+                if (! isset($this->projectedHours[$key])) {
+                    $totalHours = $entries->sum('hours');
+                    if ($totalHours > 0) {
+                        $this->projectedHours[$key] = $totalHours;
+                    }
+                }
+            }
+        }
+    }
+
     public function previousMonth(): void
     {
+        // In projection mode, prevent going before current month
+        if ($this->viewMode === 'projection') {
+            $currentDate = now()->startOfMonth();
+            $navDate = Carbon::create($this->year, $this->month, 1);
+
+            if ($navDate->isSameMonth($currentDate)) {
+                return;
+            }
+        }
+
         $date = Carbon::create($this->year, $this->month, 1)->subMonth();
         $this->year = $date->year;
         $this->month = $date->month;
@@ -108,172 +204,7 @@ class TimeTracking extends Page
 
     public function editCellAction(): Action
     {
-        return Action::make('editCell')
-            ->modalHeading(function (array $arguments): string {
-                $client = $this->clients->firstWhere('id', $arguments['clientId']);
-                $date = Carbon::parse($arguments['date'])->format('F j, Y');
-
-                return "Time Entries - {$client->name} - {$date}";
-            })
-            ->fillForm(function (array $arguments): array {
-                $this->currentEditDate = $arguments['date'];
-                $key = $arguments['clientId'].'_'.$arguments['date'];
-                $entries = $this->timeEntriesData[$key]['entries'] ?? [];
-
-                $formEntries = collect($entries)->map(function ($entry) {
-                    return [
-                        'id' => $entry['id'],
-                        'description' => $entry['description'],
-                        'hours' => $entry['hours'],
-                        'is_billed' => $entry['is_billed'],
-                        'invoice_line_id' => $entry['invoice_line_id'] ?? null,
-                    ];
-                })->toArray();
-
-                // If no entries exist, add a default empty entry
-                if (empty($formEntries)) {
-                    $formEntries = [
-                        [
-                            'description' => '',
-                            'hours' => 1,
-                            'is_billed' => false,
-                        ],
-                    ];
-                }
-
-                return [
-                    'entries' => $formEntries,
-                ];
-            })
-            ->schema(function (): array {
-                $placeholderDate = $this->currentEditDate
-                    ? Carbon::parse($this->currentEditDate)->format('M j')
-                    : Carbon::now()->format('M j');
-                $placeholder = "{$placeholderDate} hours";
-
-                return [
-                    Repeater::make('entries')
-                        ->table([
-                            TableColumn::make('Hours'),
-                            TableColumn::make('Description'),
-                            TableColumn::make('Billed'),
-                        ])
-                        ->schema([
-                            TextInput::make('hours')
-                                ->label('Hours')
-                                ->required()
-                                ->numeric()
-                                ->step(.5)
-                                ->minValue(.5)
-                                ->maxValue(24)
-                                ->suffix('hrs')
-                                ->disabled(fn (Get $get): bool => $get('is_billed') ?? false),
-                            TextInput::make('description')
-                                ->label('Description')
-                                ->placeholder($placeholder)
-                                ->maxLength(1000)
-                                ->disabled(fn (Get $get): bool => $get('is_billed') ?? false),
-                            TextEntry::make('billed')
-                                ->hiddenLabel()
-                                ->state(function (Get $get): ?HtmlString {
-                                    if (! ($get('is_billed') ?? false)) {
-                                        return null;
-                                    }
-
-                                    $invoiceLineId = $get('invoice_line_id');
-                                    if (! $invoiceLineId) {
-                                        return new HtmlString('<span class="text-sm text-gray-500">Billed</span>');
-                                    }
-
-                                    $timeEntry = TimeEntry::find($get('id'));
-                                    if (! $timeEntry || ! $timeEntry->invoiceLine) {
-                                        return new HtmlString('<span class="text-sm text-gray-500">Billed</span>');
-                                    }
-
-                                    $invoiceId = $timeEntry->invoiceLine->invoice_id;
-                                    if (! $invoiceId) {
-                                        return new HtmlString('<span class="text-sm text-gray-500">Billed</span>');
-                                    }
-
-                                    $url = route('filament.admin.resources.invoices.edit', ['record' => $invoiceId]);
-
-                                    return new HtmlString(
-                                        '<a href="'.$url.'" class="text-sm text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300">'.
-                                        'View Invoice'.
-                                        '</a>'
-                                    );
-                                }),
-                        ])
-                        ->compact()
-                        ->addActionLabel('Add Time Entry')
-                        ->reorderable(false)
-                        ->deletable(function (array $state): bool {
-                            $state = reset($state);
-                            $isBilled = $state['is_billed'] ?? false;
-
-                            return ! $isBilled;
-                        }),
-                ];
-            })
-            ->action(function (array $data, array $arguments): void {
-                $clientId = $arguments['clientId'];
-                $date = $arguments['date'];
-
-                // Generate default description
-                $defaultDescription = Carbon::parse($date)->format('M j').' hours';
-
-                // Get existing entry IDs for this cell
-                $key = $clientId.'_'.$date;
-                $existingEntryIds = collect($this->timeEntriesData[$key]['entries'] ?? [])
-                    ->pluck('id')
-                    ->toArray();
-
-                $processedIds = [];
-
-                foreach ($data['entries'] as $entryData) {
-                    // Use default description if empty
-                    $description = ! empty($entryData['description'])
-                        ? $entryData['description']
-                        : $defaultDescription;
-
-                    $entryId = $entryData['id'] ?? null;
-
-                    if (is_numeric($entryId)) {
-                        $entry = TimeEntry::find($entryId);
-                        if ($entry && ! $entry->is_billed) {
-                            $entry->update([
-                                'description' => $description,
-                                'hours' => $entryData['hours'],
-                            ]);
-                        }
-                        $processedIds[] = $entryId;
-                    } else {
-                        $newEntry = TimeEntry::create([
-                            'client_id' => $clientId,
-                            'date' => $date,
-                            'description' => $description,
-                            'hours' => $entryData['hours'],
-                        ]);
-
-                        $processedIds[] = $newEntry->id;
-                    }
-                }
-
-                $entriesToDelete = array_diff($existingEntryIds, $processedIds);
-
-                TimeEntry::whereIn('id', $entriesToDelete)
-                    ->whereNull('invoice_line_id')
-                    ->delete();
-
-                $this->loadData();
-
-                Notification::make()
-                    ->success()
-                    ->title('Time entries saved')
-                    ->send();
-            })
-            ->modalSubmitActionLabel('Save')
-            ->modalWidth('2xl');
+        return EditCellActionBuilder::make($this)->build();
     }
 
     public function getTotalHoursForClient(string $clientId): float
@@ -357,5 +288,165 @@ class TimeTracking extends Page
         $key = $this->selectedClientId.'_'.$this->selectedDate;
 
         return $this->timeEntriesData[$key]['entries'] ?? [];
+    }
+
+    public function canGoToPreviousMonth(): bool
+    {
+        if ($this->viewMode === 'projection') {
+            $currentDate = now()->startOfMonth();
+            $navDate = Carbon::create($this->year, $this->month, 1);
+
+            return ! $navDate->isSameMonth($currentDate);
+        }
+
+        return true;
+    }
+
+    public function getProjectedHoursForCell(int $clientId, int $day): ?float
+    {
+        $date = Carbon::create($this->year, $this->month, $day)->format('Y-m-d');
+        $key = $clientId.'_'.$date;
+
+        return $this->projectedHours[$key] ?? null;
+    }
+
+    public function getTotalProjectedHoursForClient(int $clientId): float
+    {
+        $total = 0;
+
+        foreach ($this->projectedHours as $key => $hours) {
+            if (str_starts_with($key, $clientId.'_')) {
+                $total += (float) $hours;
+            }
+        }
+
+        return $total;
+    }
+
+    public function getTotalProjectedRevenueForClient(int $clientId): float
+    {
+        $client = $this->clients->firstWhere('id', $clientId);
+
+        if (! $client) {
+            return 0;
+        }
+
+        return $this->getTotalProjectedHoursForClient($clientId) * $client->hourly_rate;
+    }
+
+    public function getFormattedTotalProjectedRevenueForClient(int $clientId): string
+    {
+        $client = $this->clients->firstWhere('id', $clientId);
+
+        if (! $client) {
+            return '';
+        }
+
+        $revenue = $this->getTotalProjectedRevenueForClient($clientId);
+
+        return Currency::USD->format($revenue);
+    }
+
+    public function getGrandTotalProjectedHours(): float
+    {
+        return array_sum($this->projectedHours);
+    }
+
+    public function getGrandTotalProjectedRevenue(): float
+    {
+        $total = 0;
+
+        foreach ($this->clients as $client) {
+            $revenue = $this->getTotalProjectedRevenueForClient($client->id);
+            $total += $client->currency->toUsd($revenue);
+        }
+
+        return $total;
+    }
+
+    public function saveProjectedEntry(int $clientId, string $date): void
+    {
+        $key = "{$clientId}_{$date}";
+        $hours = $this->projectedHours[$key] ?? null;
+
+        if ($hours === null || $hours === '' || $hours == 0) {
+            // Delete existing projection if hours cleared
+            ProjectedEntry::query()
+                ->where('client_id', $clientId)
+                ->where('date', $date)
+                ->delete();
+        } else {
+            // Upsert projection
+            ProjectedEntry::updateOrCreate(
+                ['client_id' => $clientId, 'date' => $date],
+                ['hours' => $hours]
+            );
+        }
+
+        // Reload to update totals
+        $this->loadProjectedData();
+    }
+
+    public function syncActuals(): void
+    {
+        $startDate = Carbon::create($this->year, $this->month, 1)->startOfMonth();
+        $today = now()->startOfDay();
+
+        $synced = 0;
+        $skipped = 0;
+
+        foreach ($this->clients as $client) {
+            for ($day = 1; $day <= $today->day; $day++) {
+                $date = $startDate->copy()->day($day);
+
+                // Get actual hours for this client/date
+                $actualHours = TimeEntry::query()
+                    ->where('client_id', $client->id)
+                    ->where('date', $date)
+                    ->sum('hours');
+
+                if ($actualHours > 0) {
+                    // Update or create projected entry with actual hours
+                    ProjectedEntry::updateOrCreate(
+                        ['client_id' => $client->id, 'date' => $date],
+                        ['hours' => $actualHours]
+                    );
+                    $synced++;
+                } else {
+                    // Check if projection exists to count skips
+                    $exists = ProjectedEntry::query()
+                        ->where('client_id', $client->id)
+                        ->where('date', $date)
+                        ->exists();
+
+                    if ($exists) {
+                        // Remove projection if no actual hours
+                        ProjectedEntry::query()
+                            ->where('client_id', $client->id)
+                            ->where('date', $date)
+                            ->delete();
+                        $skipped++;
+                    }
+                }
+            }
+        }
+
+        $message = $synced > 0 ? "Synced {$synced} projection(s)" : 'No actuals to sync';
+        if ($skipped > 0) {
+            $message .= " (removed {$skipped} empty projection(s))";
+        }
+
+        Notification::make()
+            ->title($message)
+            ->success()
+            ->send();
+
+        $this->loadProjectedData();
+    }
+
+    public function switchViewMode(string $mode): void
+    {
+        $this->viewMode = $mode;
+        $this->loadData();
     }
 }
