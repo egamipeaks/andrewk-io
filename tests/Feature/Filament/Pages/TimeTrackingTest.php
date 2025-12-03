@@ -1,6 +1,6 @@
 <?php
 
-use App\Filament\Pages\TimeTracking;
+use App\Filament\Pages\TimeTracking\TimeTrackingPage;
 use App\Models\Client;
 use App\Models\TimeEntry;
 use App\Models\User;
@@ -14,7 +14,7 @@ beforeEach(function () {
 });
 
 it('can render the time tracking page', function () {
-    livewire(TimeTracking::class)
+    livewire(TimeTrackingPage::class)
         ->assertSuccessful();
 });
 
@@ -34,7 +34,7 @@ it('displays clients with hourly rates', function () {
         'hourly_rate' => null,
     ]);
 
-    livewire(TimeTracking::class)
+    livewire(TimeTrackingPage::class)
         ->assertSee('Test Client 1')
         ->assertSee('Test Client 2')
         ->assertDontSee('No Rate Client');
@@ -43,7 +43,7 @@ it('displays clients with hourly rates', function () {
 it('can navigate between months', function () {
     Client::factory()->create(['hourly_rate' => 100]);
 
-    $component = livewire(TimeTracking::class);
+    $component = livewire(TimeTrackingPage::class);
 
     expect($component->year)->toBe(now()->year)
         ->and($component->month)->toBe(now()->month);
@@ -70,7 +70,7 @@ it('displays time entries in cells', function () {
         'description' => 'Test work',
     ]);
 
-    livewire(TimeTracking::class)
+    livewire(TimeTrackingPage::class)
         ->assertSee('8.50')
         ->assertSee('850.00'); // 8.5 * 100
 });
@@ -88,7 +88,7 @@ it('can open the edit cell modal with existing entries', function () {
 
     $undoRepeaterFake = Repeater::fake();
 
-    livewire(TimeTracking::class)
+    livewire(TimeTrackingPage::class)
         ->mountAction('editCell', ['clientId' => $client->id, 'date' => $date])
         ->assertSchemaStateSet([
             'entries' => [
@@ -112,7 +112,7 @@ it('can create new time entries via the modal', function () {
 
     $undoRepeaterFake = Repeater::fake();
 
-    livewire(TimeTracking::class)
+    livewire(TimeTrackingPage::class)
         ->callAction('editCell', data: [
             'entries' => [
                 [
@@ -151,7 +151,7 @@ it('can update existing time entries', function () {
 
     $undoRepeaterFake = Repeater::fake();
 
-    livewire(TimeTracking::class)
+    livewire(TimeTrackingPage::class)
         ->callAction('editCell', data: [
             'entries' => [
                 [
@@ -187,7 +187,7 @@ it('can delete unbilled time entries by removing them from the repeater', functi
 
     $undoRepeaterFake = Repeater::fake();
 
-    livewire(TimeTracking::class)
+    livewire(TimeTrackingPage::class)
         ->callAction('editCell', data: [
             'entries' => [], // Empty array means all entries removed
         ], arguments: [
@@ -214,7 +214,7 @@ it('cannot update billed time entries', function () {
 
     $undoRepeaterFake = Repeater::fake();
 
-    livewire(TimeTracking::class)
+    livewire(TimeTrackingPage::class)
         ->callAction('editCell', data: [
             'entries' => [
                 [
@@ -250,7 +250,7 @@ it('cannot delete billed time entries', function () {
 
     $undoRepeaterFake = Repeater::fake();
 
-    livewire(TimeTracking::class)
+    livewire(TimeTrackingPage::class)
         ->callAction('editCell', data: [
             'entries' => [], // Try to delete all
         ], arguments: [
@@ -279,7 +279,7 @@ it('calculates total hours correctly', function () {
         'hours' => 6.5,
     ]);
 
-    $component = livewire(TimeTracking::class)->instance();
+    $component = livewire(TimeTrackingPage::class)->instance();
 
     expect($component->getTotalHoursForClient($client->id))->toBe(10.5);
 });
@@ -293,7 +293,7 @@ it('calculates total revenue correctly', function () {
         'hours' => 8,
     ]);
 
-    $component = livewire(TimeTracking::class)->instance();
+    $component = livewire(TimeTrackingPage::class)->instance();
 
     expect($component->getTotalRevenueForClient($client->id))->toBe(1000.0); // 8 * 125
 });

@@ -1,6 +1,7 @@
 <?php
 
-use App\Filament\Pages\TimeTracking;
+use App\Filament\Pages\TimeTracking\IncomeProjectionPage;
+use App\Filament\Pages\TimeTracking\TimeTrackingPage;
 use App\Models\Client;
 use App\Models\ProjectedEntry;
 use App\Models\TimeEntry;
@@ -74,48 +75,36 @@ describe('ProjectedEntry Model', function () {
     });
 });
 
-describe('View Mode Switching', function () {
-    it('defaults to actual mode', function () {
-        $component = Livewire::actingAs($this->admin)->test(TimeTracking::class);
-
-        expect($component->viewMode)->toBe('actual');
+describe('Page Rendering', function () {
+    it('can render the time tracking page', function () {
+        Livewire::actingAs($this->admin)
+            ->test(TimeTrackingPage::class)
+            ->assertSuccessful();
     });
 
-    it('can switch to projection mode', function () {
-        $component = Livewire::actingAs($this->admin)
-            ->test(TimeTracking::class)
-            ->call('switchViewMode', 'projection');
-
-        expect($component->viewMode)->toBe('projection');
+    it('can render the income projection page', function () {
+        Livewire::actingAs($this->admin)
+            ->test(IncomeProjectionPage::class)
+            ->assertSuccessful();
     });
 
-    it('can switch back to actual mode', function () {
-        $component = Livewire::actingAs($this->admin)
-            ->test(TimeTracking::class)
-            ->call('switchViewMode', 'projection')
-            ->call('switchViewMode', 'actual');
-
-        expect($component->viewMode)->toBe('actual');
-    });
-
-    it('loads projected data when switching to projection mode', function () {
+    it('loads projected data on income projection page', function () {
         ProjectedEntry::factory()->currentMonth()->create([
             'client_id' => $this->client->id,
             'hours' => 5,
         ]);
 
         $component = Livewire::actingAs($this->admin)
-            ->test(TimeTracking::class)
-            ->call('switchViewMode', 'projection');
+            ->test(IncomeProjectionPage::class);
 
         expect($component->projectedEntriesData)->not->toBeEmpty();
     });
 });
 
-describe('Month Navigation in Projection Mode', function () {
-    it('can go to previous month in actual mode', function () {
+describe('Month Navigation', function () {
+    it('can go to previous month on time tracking page', function () {
         $component = Livewire::actingAs($this->admin)
-            ->test(TimeTracking::class, ['year' => now()->year, 'month' => now()->month])
+            ->test(TimeTrackingPage::class, ['year' => now()->year, 'month' => now()->month])
             ->call('previousMonth');
 
         $expectedDate = now()->subMonth();
@@ -123,12 +112,11 @@ describe('Month Navigation in Projection Mode', function () {
         expect($component->month)->toBe($expectedDate->month);
     });
 
-    it('cannot go before current month in projection mode', function () {
+    it('cannot go before current month on income projection page', function () {
         $component = Livewire::actingAs($this->admin)
-            ->test(TimeTracking::class, [
+            ->test(IncomeProjectionPage::class, [
                 'year' => now()->year,
                 'month' => now()->month,
-                'viewMode' => 'projection',
             ])
             ->call('previousMonth');
 
@@ -136,9 +124,9 @@ describe('Month Navigation in Projection Mode', function () {
         expect($component->month)->toBe(now()->month);
     });
 
-    it('can go to next month in projection mode', function () {
+    it('can go to next month on income projection page', function () {
         $component = Livewire::actingAs($this->admin)
-            ->test(TimeTracking::class, ['viewMode' => 'projection'])
+            ->test(IncomeProjectionPage::class)
             ->call('nextMonth');
 
         $expectedDate = now()->addMonth();
@@ -146,24 +134,22 @@ describe('Month Navigation in Projection Mode', function () {
         expect($component->month)->toBe($expectedDate->month);
     });
 
-    it('canGoToPreviousMonth returns false for current month in projection mode', function () {
+    it('canGoToPreviousMonth returns false for current month on income projection page', function () {
         $component = Livewire::actingAs($this->admin)
-            ->test(TimeTracking::class, [
+            ->test(IncomeProjectionPage::class, [
                 'year' => now()->year,
                 'month' => now()->month,
-                'viewMode' => 'projection',
             ]);
 
         expect($component->instance()->canGoToPreviousMonth())->toBeFalse();
     });
 
-    it('canGoToPreviousMonth returns true for future month in projection mode', function () {
+    it('canGoToPreviousMonth returns true for future month on income projection page', function () {
         $nextMonth = now()->addMonth();
         $component = Livewire::actingAs($this->admin)
-            ->test(TimeTracking::class, [
+            ->test(IncomeProjectionPage::class, [
                 'year' => $nextMonth->year,
                 'month' => $nextMonth->month,
-                'viewMode' => 'projection',
             ]);
 
         expect($component->instance()->canGoToPreviousMonth())->toBeTrue();
@@ -178,7 +164,7 @@ describe('Projection Data Loading', function () {
         ]);
 
         $component = Livewire::actingAs($this->admin)
-            ->test(TimeTracking::class, ['viewMode' => 'projection']);
+            ->test(IncomeProjectionPage::class);
 
         expect($component->projectedEntriesData)->not->toBeEmpty();
     });
@@ -193,10 +179,9 @@ describe('Projection Data Loading', function () {
         ]);
 
         $component = Livewire::actingAs($this->admin)
-            ->test(TimeTracking::class, [
+            ->test(IncomeProjectionPage::class, [
                 'year' => now()->year,
                 'month' => now()->month,
-                'viewMode' => 'projection',
             ]);
 
         $key = $this->client->id.'_'.$yesterday->format('Y-m-d');
@@ -219,10 +204,9 @@ describe('Projection Data Loading', function () {
         ]);
 
         $component = Livewire::actingAs($this->admin)
-            ->test(TimeTracking::class, [
+            ->test(IncomeProjectionPage::class, [
                 'year' => now()->year,
                 'month' => now()->month,
-                'viewMode' => 'projection',
             ]);
 
         $key = $this->client->id.'_'.$yesterday->format('Y-m-d');
@@ -241,10 +225,9 @@ describe('Auto-save Functionality', function () {
         ]);
 
         $component = Livewire::actingAs($this->admin)
-            ->test(TimeTracking::class, [
+            ->test(IncomeProjectionPage::class, [
                 'year' => $tomorrow->year,
                 'month' => $tomorrow->month,
-                'viewMode' => 'projection',
             ]);
 
         $key = $this->client->id.'_'.$tomorrow->format('Y-m-d');
@@ -261,7 +244,7 @@ describe('Auto-save Functionality', function () {
         ]);
 
         $component = Livewire::actingAs($this->admin)
-            ->test(TimeTracking::class, ['viewMode' => 'projection']);
+            ->test(IncomeProjectionPage::class);
 
         $key = $this->client->id.'_'.$tomorrow->format('Y-m-d');
         $component->set("projectedHours.{$key}", 0);
@@ -276,10 +259,9 @@ describe('Auto-save Functionality', function () {
 describe('Sync Actuals Functionality', function () {
     it('calls syncActuals without errors', function () {
         Livewire::actingAs($this->admin)
-            ->test(TimeTracking::class, [
+            ->test(IncomeProjectionPage::class, [
                 'year' => now()->year,
                 'month' => now()->month,
-                'viewMode' => 'projection',
             ])
             ->call('syncActuals')
             ->assertNotified();
@@ -295,10 +277,9 @@ describe('Sync Actuals Functionality', function () {
         ]);
 
         Livewire::actingAs($this->admin)
-            ->test(TimeTracking::class, [
+            ->test(IncomeProjectionPage::class, [
                 'year' => now()->year,
                 'month' => now()->month,
-                'viewMode' => 'projection',
             ])
             ->call('syncActuals');
 
@@ -317,10 +298,9 @@ describe('Sync Actuals Functionality', function () {
         ]);
 
         Livewire::actingAs($this->admin)
-            ->test(TimeTracking::class, [
+            ->test(IncomeProjectionPage::class, [
                 'year' => now()->year,
                 'month' => now()->month,
-                'viewMode' => 'projection',
             ])
             ->call('syncActuals')
             ->assertNotified();
@@ -336,7 +316,7 @@ describe('Projection Calculations', function () {
         ];
 
         $component = Livewire::actingAs($this->admin)
-            ->test(TimeTracking::class, ['viewMode' => 'projection']);
+            ->test(IncomeProjectionPage::class);
 
         foreach ($dates as $date) {
             $key = $this->client->id.'_'.$date;
@@ -353,7 +333,7 @@ describe('Projection Calculations', function () {
         ];
 
         $component = Livewire::actingAs($this->admin)
-            ->test(TimeTracking::class, ['viewMode' => 'projection']);
+            ->test(IncomeProjectionPage::class);
 
         foreach ($dates as $date) {
             $key = $this->client->id.'_'.$date;
@@ -367,7 +347,7 @@ describe('Projection Calculations', function () {
         $client2 = Client::factory()->create(['hourly_rate' => 150, 'is_active' => true]);
 
         $component = Livewire::actingAs($this->admin)
-            ->test(TimeTracking::class, ['viewMode' => 'projection']);
+            ->test(IncomeProjectionPage::class);
 
         $key1 = $this->client->id.'_'.now()->addDay(1)->format('Y-m-d');
         $key2 = $this->client->id.'_'.now()->addDay(2)->format('Y-m-d');
@@ -389,7 +369,7 @@ describe('Projection Calculations', function () {
         ]);
 
         $component = Livewire::actingAs($this->admin)
-            ->test(TimeTracking::class, ['viewMode' => 'projection']);
+            ->test(IncomeProjectionPage::class);
 
         $formatted = $component->instance()->getFormattedTotalProjectedRevenueForClient($this->client->id);
 

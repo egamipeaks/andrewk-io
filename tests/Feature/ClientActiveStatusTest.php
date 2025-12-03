@@ -1,6 +1,6 @@
 <?php
 
-use App\Filament\Pages\TimeTracking;
+use App\Filament\Pages\TimeTracking\TimeTrackingPage;
 use App\Filament\Resources\Clients\Pages\CreateClient;
 use App\Filament\Resources\Clients\Pages\EditClient;
 use App\Models\Client;
@@ -43,10 +43,10 @@ describe('Time Tracking Page Filtering', function () {
         ]);
 
         Livewire::actingAs($this->admin)
-            ->test(TimeTracking::class)
+            ->test(TimeTrackingPage::class)
             ->assertSuccessful();
 
-        $component = Livewire::actingAs($this->admin)->test(TimeTracking::class);
+        $component = Livewire::actingAs($this->admin)->test(TimeTrackingPage::class);
 
         expect($component->clients->pluck('id'))->toContain($activeClient->id);
     });
@@ -57,7 +57,7 @@ describe('Time Tracking Page Filtering', function () {
             'hourly_rate' => 100,
         ]);
 
-        $component = Livewire::actingAs($this->admin)->test(TimeTracking::class);
+        $component = Livewire::actingAs($this->admin)->test(TimeTrackingPage::class);
 
         expect($component->clients->pluck('id'))->not->toContain($inactiveClient->id);
     });
@@ -68,7 +68,7 @@ describe('Time Tracking Page Filtering', function () {
             'hourly_rate' => null,
         ]);
 
-        $component = Livewire::actingAs($this->admin)->test(TimeTracking::class);
+        $component = Livewire::actingAs($this->admin)->test(TimeTrackingPage::class);
 
         expect($component->clients->pluck('id'))->not->toContain($clientWithoutRate->id);
     });
@@ -79,7 +79,7 @@ describe('Time Tracking Page Filtering', function () {
             'hourly_rate' => 0,
         ]);
 
-        $component = Livewire::actingAs($this->admin)->test(TimeTracking::class);
+        $component = Livewire::actingAs($this->admin)->test(TimeTrackingPage::class);
 
         expect($component->clients->pluck('id'))->not->toContain($clientWithZeroRate->id);
     });
@@ -105,7 +105,7 @@ describe('Time Tracking Page Filtering', function () {
             'hourly_rate' => null,
         ]);
 
-        $component = Livewire::actingAs($this->admin)->test(TimeTracking::class);
+        $component = Livewire::actingAs($this->admin)->test(TimeTrackingPage::class);
         $clientIds = $component->clients->pluck('id');
 
         // Only active client with rate should show

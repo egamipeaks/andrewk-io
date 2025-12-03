@@ -2,7 +2,7 @@
 
 namespace App\Filament\Pages\TimeTracking\Actions;
 
-use App\Filament\Pages\TimeTracking;
+use App\Filament\Pages\TimeTracking\TimeTrackingPage;
 use App\Models\TimeEntry;
 use Carbon\Carbon;
 use Filament\Actions\Action;
@@ -17,10 +17,10 @@ use Illuminate\Support\HtmlString;
 class EditCellActionBuilder
 {
     public function __construct(
-        protected TimeTracking $page
+        protected TimeTrackingPage $page
     ) {}
 
-    public static function make(TimeTracking $page): self
+    public static function make(TimeTrackingPage $page): self
     {
         return new self($page);
     }
