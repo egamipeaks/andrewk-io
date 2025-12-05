@@ -29,6 +29,13 @@ class Client extends Model
         'currency' => 'USD',
     ];
 
+    public function scopeCanTrackTime($query)
+    {
+        return $query->where('is_active', true)
+            ->whereNotNull('hourly_rate')
+            ->where('hourly_rate', '>', 0);
+    }
+
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);

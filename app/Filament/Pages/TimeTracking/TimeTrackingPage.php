@@ -6,6 +6,7 @@ use App\Enums\Currency;
 use App\Filament\Pages\TimeTracking\Actions\EditCellActionBuilder;
 use App\Filament\Pages\TimeTracking\Concerns\HasMonthNavigation;
 use App\Models\TimeEntry;
+use App\Services\TimeEntryService;
 use Filament\Actions\Action;
 use Filament\Pages\Page;
 use Illuminate\Support\Collection;
@@ -60,20 +61,18 @@ class TimeTrackingPage extends Page
     {
         $this->loadClients();
 
-        $timeEntries = TimeEntry::query()
-            ->whereIn('client_id', $this->clients->pluck('id'))
-            ->whereBetween('date', [$this->getStartDate(), $this->getEndDate()])
-            ->with('client')
-            ->get()
-            ->groupBy(fn (TimeEntry $entry) => "{$entry->client_id}_{$entry->date->format('Y-m-d')}");
+        $timeEntries = app(TimeEntryService::class)
+            ->getTimeEntries(
+                $this->clients->pluck('id'),
+                $this->getStartDate(),
+                $this->getEndDate()
+            );
 
-        $this->timeEntriesData = $timeEntries->map(function (Collection $entries) {
-            return [
-                'total_hours' => $entries->sum('hours'),
-                'is_billed' => $entries->every(fn (TimeEntry $entry) => $entry->is_billed),
-                'entries' => $entries->toArray(),
-            ];
-        })->toArray();
+        $this->timeEntriesData = $timeEntries->map(fn (Collection $entries) => [
+            'total_hours' => $entries->sum('hours'),
+            'is_billed' => $entries->every(fn (TimeEntry $entry) => $entry->is_billed),
+            'entries' => $entries->toArray(),
+        ])->toArray();
     }
 
     public function editCellAction(): Action
@@ -87,17 +86,6 @@ class TimeTrackingPage extends Page
         $key = "{$clientId}_{$date}";
 
         return $this->timeEntriesData[$key] ?? null;
-    }
-
-    public function getEntriesForCell(): array
-    {
-        if (! $this->selectedClientId || ! $this->selectedDate) {
-            return [];
-        }
-
-        $key = "{$this->selectedClientId}_{$this->selectedDate}";
-
-        return $this->timeEntriesData[$key]['entries'] ?? [];
     }
 
     public function getTotalHoursForClient(string $clientId): float

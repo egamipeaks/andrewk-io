@@ -6,6 +6,8 @@ use App\Enums\Currency;
 use App\Filament\Pages\TimeTracking\Concerns\HasMonthNavigation;
 use App\Models\ProjectedEntry;
 use App\Models\TimeEntry;
+use App\Services\ProjectedEntryService;
+use App\Services\TimeEntryService;
 use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
@@ -76,19 +78,17 @@ class IncomeProjectionPage extends Page
     {
         $this->loadClients();
 
-        $projectedEntries = ProjectedEntry::query()
-            ->whereIn('client_id', $this->clients->pluck('id'))
-            ->whereBetween('date', [$this->getStartDate(), $this->getEndDate()])
-            ->with('client')
-            ->get()
-            ->groupBy(fn (ProjectedEntry $entry) => "{$entry->client_id}_{$entry->date->format('Y-m-d')}");
+        $projectedEntries = app(ProjectedEntryService::class)
+            ->getProjectedEntries(
+                $this->clients->pluck('id'),
+                $this->getStartDate(),
+                $this->getEndDate()
+            );
 
-        $this->projectedEntriesData = $projectedEntries->map(function (Collection $entries) {
-            return [
-                'total_hours' => $entries->sum('hours'),
-                'entries' => $entries->toArray(),
-            ];
-        })->toArray();
+        $this->projectedEntriesData = $projectedEntries->map(fn (Collection $entries) => [
+            'total_hours' => $entries->sum('hours'),
+            'entries' => $entries->toArray(),
+        ])->toArray();
 
         $this->projectedHours = [];
         foreach ($projectedEntries as $key => $entries) {
@@ -106,11 +106,12 @@ class IncomeProjectionPage extends Page
 
         $today = now()->startOfDay();
 
-        $actualEntries = TimeEntry::query()
-            ->whereIn('client_id', $this->clients->pluck('id'))
-            ->whereBetween('date', [$this->getStartDate(), $today])
-            ->get()
-            ->groupBy(fn (TimeEntry $entry) => "{$entry->client_id}_{$entry->date->format('Y-m-d')}");
+        $actualEntries = app(TimeEntryService::class)
+            ->getTimeEntries(
+                $this->clients->pluck('id'),
+                $this->getStartDate(),
+                $today
+            );
 
         foreach ($actualEntries as $key => $entries) {
             if (! isset($this->projectedHours[$key])) {
@@ -189,7 +190,7 @@ class IncomeProjectionPage extends Page
         $key = "{$clientId}_{$date}";
         $hours = $this->projectedHours[$key] ?? null;
 
-        if ($hours === null || $hours === '' || $hours == 0) {
+        if ($hours === '' || $hours == 0) {
             ProjectedEntry::query()
                 ->where('client_id', $clientId)
                 ->where('date', $date)

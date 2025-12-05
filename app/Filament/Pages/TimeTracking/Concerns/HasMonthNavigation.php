@@ -31,9 +31,7 @@ trait HasMonthNavigation
     public function loadClients(): void
     {
         $this->clients = Client::query()
-            ->where('is_active', true)
-            ->whereNotNull('hourly_rate')
-            ->where('hourly_rate', '>', 0)
+            ->canTrackTime()
             ->orderBy('name')
             ->get();
     }
