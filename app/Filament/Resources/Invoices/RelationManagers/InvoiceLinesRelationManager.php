@@ -154,7 +154,7 @@ class InvoiceLinesRelationManager extends RelationManager
             ->headerActions([
                 Actions\CreateAction::make(),
             ])
-            ->actions([
+            ->recordActions([
                 Actions\Action::make('viewSourceEntries')
                     ->label('Entries')
                     ->icon('heroicon-o-clock')
@@ -186,7 +186,7 @@ class InvoiceLinesRelationManager extends RelationManager
                         return null;
                     }),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 Actions\DeleteBulkAction::make(),
                 Actions\BulkAction::make('mergeHourlyLines')
                     ->label('Merge Hourly Lines')
