@@ -77,8 +77,9 @@ return Application::configure(basePath: dirname(__DIR__))
         });
     })
     ->withSchedule(function (Schedule $schedule) {
-        // Define the application's command schedule
-        // $schedule->command('inspire')->hourly();
+        $schedule->command('backup:run')->daily();
+        $schedule->command('backup:clean')->daily();
+        $schedule->command('backup:monitor')->daily();
     })
     ->withCommands([
         __DIR__.'/../app/Console/Commands',
