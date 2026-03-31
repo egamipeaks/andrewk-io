@@ -1,5 +1,5 @@
 <tr>
 <td class="header">
-<img src="{{ asset('images/logo-8bit.png') }}" alt="andrewk.io logo" width="550" />
+<img src="{{ asset('images/sugardev-logo-simple.png') }}" alt="Sugardev logo" width="200" />
 </td>
 </tr>

@@ -50,7 +50,7 @@ it('can navigate between months', function () {
 
     $component->call('nextMonth');
 
-    $nextMonth = now()->addMonth();
+    $nextMonth = now()->startOfMonth()->addMonth();
     expect($component->year)->toBe($nextMonth->year)
         ->and($component->month)->toBe($nextMonth->month);
 

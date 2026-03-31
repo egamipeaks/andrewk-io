@@ -107,7 +107,7 @@ describe('Month Navigation', function () {
             ->test(TimeTrackingPage::class, ['year' => now()->year, 'month' => now()->month])
             ->call('previousMonth');
 
-        $expectedDate = now()->subMonth();
+        $expectedDate = now()->startOfMonth()->subMonth();
         expect($component->year)->toBe($expectedDate->year);
         expect($component->month)->toBe($expectedDate->month);
     });
@@ -129,7 +129,7 @@ describe('Month Navigation', function () {
             ->test(IncomeProjectionPage::class)
             ->call('nextMonth');
 
-        $expectedDate = now()->addMonth();
+        $expectedDate = now()->startOfMonth()->addMonth();
         expect($component->year)->toBe($expectedDate->year);
         expect($component->month)->toBe($expectedDate->month);
     });
@@ -145,7 +145,7 @@ describe('Month Navigation', function () {
     });
 
     it('canGoToPreviousMonth returns true for future month on income projection page', function () {
-        $nextMonth = now()->addMonth();
+        $nextMonth = now()->startOfMonth()->addMonth();
         $component = Livewire::actingAs($this->admin)
             ->test(IncomeProjectionPage::class, [
                 'year' => $nextMonth->year,

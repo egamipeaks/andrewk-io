@@ -110,8 +110,8 @@ describe('Email Preview Content', function () {
             ->get(route('invoice.email.preview', $this->invoice));
 
         $response->assertOk()
-            ->assertSee('You have received an invoice')
-            ->assertSeeText('Billed To: '.$this->client->name)
+            ->assertSee('Sugardev, LLC')
+            ->assertSee($this->client->name)
             ->assertSee($this->invoice->due_date->format('F j, Y'))
             ->assertSee($this->invoice->formattedTotal());
     });

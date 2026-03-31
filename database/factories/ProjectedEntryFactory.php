@@ -35,8 +35,8 @@ class ProjectedEntryFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'date' => fake()->dateTimeBetween(
-                now()->addMonth()->startOfMonth(),
-                now()->addMonth()->endOfMonth()
+                now()->startOfMonth()->addMonth(),
+                now()->startOfMonth()->addMonth()->endOfMonth()
             ),
         ]);
     }
