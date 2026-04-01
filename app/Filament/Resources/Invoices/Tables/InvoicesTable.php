@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Invoices\Tables;
 
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -50,6 +51,20 @@ class InvoicesTable
             ])
             ->recordActions([
                 EditAction::make(),
+                Action::make('markPaid')
+                    ->label('Mark as Paid')
+                    ->icon('heroicon-o-currency-dollar')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->hidden(fn ($record): bool => $record->paid)
+                    ->action(fn ($record) => $record->update(['paid' => true])),
+                Action::make('markSent')
+                    ->label('Mark as Sent')
+                    ->icon('heroicon-o-paper-airplane')
+                    ->color('info')
+                    ->requiresConfirmation()
+                    ->hidden(fn ($record): bool => $record->isSent())
+                    ->action(fn ($record) => $record->update(['sent' => true])),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

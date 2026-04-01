@@ -170,11 +170,11 @@ describe('Projection Data Loading', function () {
     });
 
     it('pre-fills past days with actual time entry totals', function () {
-        $yesterday = now()->subDay();
+        $pastDay = now()->startOfMonth();
 
         TimeEntry::factory()->create([
             'client_id' => $this->client->id,
-            'date' => $yesterday,
+            'date' => $pastDay,
             'hours' => 5,
         ]);
 
@@ -184,22 +184,22 @@ describe('Projection Data Loading', function () {
                 'month' => now()->month,
             ]);
 
-        $key = $this->client->id.'_'.$yesterday->format('Y-m-d');
+        $key = $this->client->id.'_'.$pastDay->format('Y-m-d');
         expect($component->projectedHours[$key] ?? null)->toBe(5.0);
     });
 
     it('does not overwrite existing projections with actual data', function () {
-        $yesterday = now()->subDay();
+        $pastDay = now()->startOfMonth();
 
         TimeEntry::factory()->create([
             'client_id' => $this->client->id,
-            'date' => $yesterday,
+            'date' => $pastDay,
             'hours' => 5,
         ]);
 
         ProjectedEntry::factory()->create([
             'client_id' => $this->client->id,
-            'date' => $yesterday,
+            'date' => $pastDay,
             'hours' => 8,
         ]);
 
@@ -209,7 +209,7 @@ describe('Projection Data Loading', function () {
                 'month' => now()->month,
             ]);
 
-        $key = $this->client->id.'_'.$yesterday->format('Y-m-d');
+        $key = $this->client->id.'_'.$pastDay->format('Y-m-d');
         expect($component->projectedHours[$key])->toBe(8.0);
     });
 });

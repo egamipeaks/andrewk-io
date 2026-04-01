@@ -16,6 +16,7 @@ class Invoice extends Model
     protected $fillable = [
         'client_id',
         'paid',
+        'sent',
         'currency',
         'conversion_rate',
         'due_date',
@@ -85,7 +86,7 @@ class Invoice extends Model
 
     public function isSent(): bool
     {
-        return $this->emailSends()->exists();
+        return $this->sent || $this->emailSends()->exists();
     }
 
     public function isPaid(): bool
