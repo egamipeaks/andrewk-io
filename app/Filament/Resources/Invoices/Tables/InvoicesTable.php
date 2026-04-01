@@ -52,14 +52,14 @@ class InvoicesTable
             ->recordActions([
                 EditAction::make(),
                 Action::make('markPaid')
-                    ->label('Mark as Paid')
+                    ->label('Mark Paid')
                     ->icon('heroicon-o-currency-dollar')
                     ->color('success')
                     ->requiresConfirmation()
                     ->hidden(fn ($record): bool => $record->paid)
                     ->action(fn ($record) => $record->update(['paid' => true])),
                 Action::make('markSent')
-                    ->label('Mark as Sent')
+                    ->label('Mark Sent')
                     ->icon('heroicon-o-paper-airplane')
                     ->color('info')
                     ->requiresConfirmation()
