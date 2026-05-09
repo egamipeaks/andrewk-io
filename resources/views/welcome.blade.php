@@ -26,7 +26,7 @@
 {{--                    </p>--}}
 
                     <p>
-                        I also make <a href="https://open.spotify.com/artist/1VOaizHACRU5vgCQr6RCid?si=xtP-l1uyT9qFE-ti3P1BfQ" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">music</a> under the name Egami Peaks.
+                        I also make <a href="https://egamipeaks.com" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">music</a> under the name Egami Peaks.
                     </p>
                 </div>
             </div>
