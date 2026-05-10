@@ -79,7 +79,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withSchedule(function (Schedule $schedule) {
         $schedule->command('backup:run')->daily();
         $schedule->command('backup:clean')->daily();
-        $schedule->command('backup:monitor')->daily();
+        $schedule->command('backup:monitor')->weekly();
     })
     ->withCommands([
         __DIR__.'/../app/Console/Commands',
