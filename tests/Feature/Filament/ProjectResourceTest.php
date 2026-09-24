@@ -49,8 +49,8 @@ describe('Projects table', function () {
 
         Livewire::actingAs($this->admin)
             ->test(ListProjects::class)
-            ->assertTableColumnStateSet('hours_used', 12.0, $project)
-            ->assertTableColumnStateSet('hours_remaining', -2.0, $project);
+            ->assertTableColumnStateSet('hours_used', 12.0, $project->getKey())
+            ->assertTableColumnStateSet('hours_remaining', -2.0, $project->getKey());
     });
 
     it('shows all time hours in range when no date range is set', function () {
@@ -59,7 +59,7 @@ describe('Projects table', function () {
 
         Livewire::actingAs($this->admin)
             ->test(ListProjects::class)
-            ->assertTableColumnStateSet('hours_in_range', 5.0, $project);
+            ->assertTableColumnStateSet('hours_in_range', 5.0, $project->getKey());
     });
 
     it('limits hours in range to the date range without hiding projects', function () {
@@ -71,8 +71,8 @@ describe('Projects table', function () {
             ->test(ListProjects::class)
             ->filterTable('date_range', ['from' => '2026-09-01', 'until' => '2026-09-30'])
             ->assertCanSeeTableRecords([$project])
-            ->assertTableColumnStateSet('hours_in_range', 3.0, $project)
-            ->assertTableColumnStateSet('hours_used', 10.0, $project);
+            ->assertTableColumnStateSet('hours_in_range', 3.0, $project->getKey())
+            ->assertTableColumnStateSet('hours_used', 10.0, $project->getKey());
     });
 
     it('shows zero hours in range when nothing falls inside the range', function () {
@@ -82,7 +82,7 @@ describe('Projects table', function () {
         Livewire::actingAs($this->admin)
             ->test(ListProjects::class)
             ->filterTable('date_range', ['from' => '2026-09-01', 'until' => '2026-09-30'])
-            ->assertTableColumnStateSet('hours_in_range', 0.0, $project);
+            ->assertTableColumnStateSet('hours_in_range', 0.0, $project->getKey());
     });
 });
 

@@ -7,7 +7,6 @@ use Carbon\Carbon;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Tables;
-use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -47,7 +46,7 @@ class ProjectsTable
                     ->placeholder('—'),
                 Tables\Columns\TextColumn::make('hours_in_range')
                     ->label('In range')
-                    ->state(fn (Project $record, HasTable $livewire): float => self::hoursInRange($record, $livewire))
+                    ->state(fn (Project $record): float => self::hoursInRange($record))
                     ->numeric(decimalPlaces: 1),
                 Tables\Columns\IconColumn::make('is_active')
                     ->label('Active')
@@ -66,6 +65,11 @@ class ProjectsTable
                         DatePicker::make('from'),
                         DatePicker::make('until'),
                     ])
+                    ->baseQuery(fn (Builder $query, array $data): Builder => self::withHoursInRange(
+                        $query,
+                        $data['from'] ?? null,
+                        $data['until'] ?? null,
+                    ))
                     ->indicateUsing(fn (array $data): ?string => self::dateRangeIndicator(
                         $data['from'] ?? null,
                         $data['until'] ?? null,
@@ -76,21 +80,26 @@ class ProjectsTable
             ]);
     }
 
-    protected static function hoursInRange(Project $record, HasTable $livewire): float
+    protected static function withHoursInRange(Builder $query, ?string $from, ?string $until): Builder
     {
-        $data = $livewire->getTableFilterState('date_range') ?? [];
-
-        $from = $data['from'] ?? null;
-        $until = $data['until'] ?? null;
-
         if (blank($from) && blank($until)) {
-            return $record->hoursUsed();
+            return $query;
         }
 
-        return (float) $record->timeEntries()
-            ->when($from, fn (Builder $query, string $from) => $query->whereDate('date', '>=', $from))
-            ->when($until, fn (Builder $query, string $until) => $query->whereDate('date', '<=', $until))
-            ->sum('hours');
+        return $query->withSum([
+            'timeEntries as hours_in_range' => fn (Builder $entries) => $entries
+                ->when($from, fn (Builder $entries, string $from) => $entries->whereDate('date', '>=', $from))
+                ->when($until, fn (Builder $entries, string $until) => $entries->whereDate('date', '<=', $until)),
+        ], 'hours');
+    }
+
+    protected static function hoursInRange(Project $record): float
+    {
+        if (array_key_exists('hours_in_range', $record->getAttributes())) {
+            return (float) $record->getAttributes()['hours_in_range'];
+        }
+
+        return $record->hoursUsed();
     }
 
     protected static function dateRangeIndicator(?string $from, ?string $until): ?string
