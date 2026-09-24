@@ -125,6 +125,28 @@ class InvoiceLine extends Model
         return $currency->format($this->hourlyRateInClientCurrency());
     }
 
+    public static function formatHours(float $hours): string
+    {
+        if ($hours < 1) {
+            $minutes = round($hours * 60);
+
+            return "{$minutes} min";
+        }
+
+        if ($hours == 1) {
+            return '1 hr';
+        }
+
+        $formatted = number_format($hours, fmod($hours, 1) ? 2 : 0);
+
+        return "{$formatted} hrs";
+    }
+
+    public function formattedHours(): string
+    {
+        return self::formatHours((float) $this->hours);
+    }
+
     public function scopeHourly($query)
     {
         return $query->where('type', InvoiceLineType::Hourly);

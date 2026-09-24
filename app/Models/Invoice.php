@@ -7,6 +7,7 @@ use App\Mail\InvoiceEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Mail;
 
 class Invoice extends Model
@@ -92,6 +93,42 @@ class Invoice extends Model
     public function isPaid(): bool
     {
         return $this->paid;
+    }
+
+    public function hasProjectLines(): bool
+    {
+        return $this->invoiceLines->contains(fn (InvoiceLine $line): bool => $line->project_id !== null);
+    }
+
+    /** @return Collection<int, array{
+        name: string,
+        lines: Collection<int, InvoiceLine>,
+        formattedHours: ?string,
+        formattedSubtotal: string
+    }> */
+    public function linesGroupedByProject(): Collection
+    {
+        $currency = $this->currency ?? Currency::USD;
+
+        $groups = $this->invoiceLines
+            ->loadMissing('project')
+            ->groupBy(fn (InvoiceLine $line): int => $line->project_id ?? 0)
+            ->map(function (Collection $lines) use ($currency): array {
+                $hours = (float) $lines->sum('hours');
+                $subtotal = $lines->sum(fn (InvoiceLine $line): float => $line->subtotalInClientCurrency());
+
+                return [
+                    'name' => $lines->first()->project?->name ?? 'Other',
+                    'lines' => $lines->values(),
+                    'formattedHours' => $hours > 0 ? InvoiceLine::formatHours($hours) : null,
+                    'formattedSubtotal' => $currency->format($subtotal),
+                ];
+            });
+
+        return $groups->except(0)
+            ->sortBy('name')
+            ->concat($groups->only(0))
+            ->values();
     }
 
     public function emailSends(): HasMany
