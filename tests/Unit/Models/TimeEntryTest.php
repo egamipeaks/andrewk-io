@@ -10,6 +10,7 @@ describe('TimeEntry Model', function () {
         $timeEntry = new TimeEntry;
         expect($timeEntry->getFillable())->toBe([
             'client_id',
+            'project_id',
             'invoice_line_id',
             'date',
             'hours',
