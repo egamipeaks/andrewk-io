@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use InvalidArgumentException;
 
 class TimeEntry extends Model
 {
@@ -15,6 +16,7 @@ class TimeEntry extends Model
 
     protected $fillable = [
         'client_id',
+        'project_id',
         'invoice_line_id',
         'date',
         'hours',
@@ -31,9 +33,31 @@ class TimeEntry extends Model
         'hours' => 'decimal:2',
     ];
 
+    protected static function booted(): void
+    {
+        static::saving(function (TimeEntry $entry): void {
+            if ($entry->project_id === null) {
+                return;
+            }
+
+            if (! $entry->isDirty(['project_id', 'client_id'])) {
+                return;
+            }
+
+            if (! Project::belongsToClient((int) $entry->project_id, $entry->client_id)) {
+                throw new InvalidArgumentException("Project {$entry->project_id} does not belong to client {$entry->client_id}.");
+            }
+        });
+    }
+
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
+    }
+
+    public function project(): BelongsTo
+    {
+        return $this->belongsTo(Project::class);
     }
 
     public function invoiceLine(): BelongsTo

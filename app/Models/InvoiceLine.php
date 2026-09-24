@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use InvalidArgumentException;
 
 class InvoiceLine extends Model
 {
@@ -17,6 +18,7 @@ class InvoiceLine extends Model
 
     protected $fillable = [
         'invoice_id',
+        'project_id',
         'description',
         'date',
         'type',
@@ -30,9 +32,33 @@ class InvoiceLine extends Model
         'type' => InvoiceLineType::class,
     ];
 
+    protected static function booted(): void
+    {
+        static::saving(function (InvoiceLine $line): void {
+            if ($line->project_id === null) {
+                return;
+            }
+
+            if (! $line->isDirty(['project_id', 'invoice_id'])) {
+                return;
+            }
+
+            $clientId = Invoice::query()->whereKey($line->invoice_id)->value('client_id');
+
+            if (! Project::belongsToClient((int) $line->project_id, $clientId)) {
+                throw new InvalidArgumentException("Project {$line->project_id} does not belong to client {$clientId}.");
+            }
+        });
+    }
+
     public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class);
+    }
+
+    public function project(): BelongsTo
+    {
+        return $this->belongsTo(Project::class);
     }
 
     public function timeEntries(): HasMany

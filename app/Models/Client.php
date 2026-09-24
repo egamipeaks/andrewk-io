@@ -46,6 +46,11 @@ class Client extends Model
         return $this->hasMany(TimeEntry::class);
     }
 
+    public function projects(): HasMany
+    {
+        return $this->hasMany(Project::class);
+    }
+
     public function projectedEntries(): HasMany
     {
         return $this->hasMany(ProjectedEntry::class);

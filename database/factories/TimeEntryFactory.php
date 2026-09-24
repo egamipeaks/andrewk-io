@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Client;
 use App\Models\InvoiceLine;
+use App\Models\Project;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -25,6 +26,14 @@ class TimeEntryFactory extends Factory
             'hours' => fake()->randomFloat(2, 0.5, 10),
             'description' => fake()->sentence(),
         ];
+    }
+
+    public function forProject(Project $project): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'client_id' => $project->client_id,
+            'project_id' => $project->id,
+        ]);
     }
 
     public function billed(): static
