@@ -45,13 +45,54 @@ class Project extends Model
         return $query->where('is_active', true);
     }
 
+    public function manualInvoiceLines(): HasMany
+    {
+        return $this->invoiceLines()
+            ->hourly()
+            ->doesntHave('timeEntries');
+    }
+
+    public function scopeWithHours(Builder $query, string $alias = 'hours_used', ?string $from = null, ?string $until = null): Builder
+    {
+        return $query
+            ->withSum([
+                "timeEntries as {$alias}_from_entries" => fn (Builder $entries) => self::betweenDates($entries, $from, $until),
+            ], 'hours')
+            ->withSum([
+                "invoiceLines as {$alias}_from_lines" => fn (Builder $lines) => self::betweenDates(
+                    $lines->hourly()->doesntHave('timeEntries'),
+                    $from,
+                    $until,
+                ),
+            ], 'hours');
+    }
+
+    public function hasPreloadedHours(string $alias): bool
+    {
+        return array_key_exists("{$alias}_from_entries", $this->attributes);
+    }
+
+    public function preloadedHours(string $alias): float
+    {
+        return (float) ($this->attributes["{$alias}_from_entries"] ?? 0)
+            + (float) ($this->attributes["{$alias}_from_lines"] ?? 0);
+    }
+
     public function hoursUsed(): float
     {
-        if (array_key_exists('hours_used', $this->attributes)) {
-            return (float) $this->attributes['hours_used'];
+        if ($this->hasPreloadedHours('hours_used')) {
+            return $this->preloadedHours('hours_used');
         }
 
-        return (float) $this->timeEntries()->sum('hours');
+        return (float) $this->timeEntries()->sum('hours')
+            + (float) $this->manualInvoiceLines()->sum('hours');
+    }
+
+    protected static function betweenDates(Builder $query, ?string $from, ?string $until): Builder
+    {
+        return $query
+            ->when($from, fn (Builder $query, string $from) => $query->whereDate('date', '>=', $from))
+            ->when($until, fn (Builder $query, string $until) => $query->whereDate('date', '<=', $until));
     }
 
     public function hoursRemaining(): ?float

@@ -49,6 +49,14 @@ class InvoiceLine extends Model
                 throw new InvalidArgumentException("Project {$line->project_id} does not belong to client {$clientId}.");
             }
         });
+
+        static::updated(function (InvoiceLine $line): void {
+            if (! $line->wasChanged('project_id')) {
+                return;
+            }
+
+            $line->timeEntries()->update(['project_id' => $line->project_id]);
+        });
     }
 
     public function invoice(): BelongsTo

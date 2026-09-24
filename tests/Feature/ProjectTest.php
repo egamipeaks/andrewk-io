@@ -6,6 +6,18 @@ use App\Models\InvoiceLine;
 use App\Models\Project;
 use App\Models\TimeEntry;
 
+beforeEach(function () {
+    $this->projectInvoiceLine = function (Project $project, array $attributes = []): InvoiceLine {
+        $invoice = Invoice::factory()->create(['client_id' => $project->client_id]);
+
+        return InvoiceLine::factory()->hourly()->create([
+            'invoice_id' => $invoice->id,
+            'project_id' => $project->id,
+            ...$attributes,
+        ]);
+    };
+});
+
 describe('Project relationships', function () {
     it('belongs to a client and the client has many projects', function () {
         $client = Client::factory()->create();
@@ -61,13 +73,53 @@ describe('Project hours', function () {
         expect($project->hoursUsed())->toBe(0.0);
     });
 
-    it('uses the preloaded hours_used sum when present', function () {
+    it('uses the preloaded hours when loaded with the withHours scope', function () {
         $project = Project::factory()->create();
         TimeEntry::factory()->forProject($project)->create(['hours' => 4]);
+        ($this->projectInvoiceLine)($project, ['hours' => 1.5]);
 
-        $loaded = Project::query()->withSum('timeEntries as hours_used', 'hours')->find($project->id);
+        $loaded = Project::query()->withHours()->find($project->id);
 
-        expect($loaded->hoursUsed())->toBe(4.0);
+        expect($loaded->hoursUsed())->toBe(5.5);
+    });
+
+    it('counts hourly invoice lines that have no time entries behind them', function () {
+        $project = Project::factory()->create();
+        TimeEntry::factory()->forProject($project)->create(['hours' => 2]);
+        ($this->projectInvoiceLine)($project, ['hours' => 0.5]);
+
+        expect($project->hoursUsed())->toBe(2.5);
+    });
+
+    it('does not double count invoice lines created from time entries', function () {
+        $project = Project::factory()->create();
+        $line = ($this->projectInvoiceLine)($project, ['hours' => 3]);
+        TimeEntry::factory()->forProject($project)->create(['hours' => 3, 'invoice_line_id' => $line->id]);
+
+        expect($project->hoursUsed())->toBe(3.0)
+            ->and(Project::query()->withHours()->find($project->id)->hoursUsed())->toBe(3.0);
+    });
+
+    it('ignores fixed price invoice lines', function () {
+        $project = Project::factory()->create();
+        $invoice = Invoice::factory()->create(['client_id' => $project->client_id]);
+        InvoiceLine::factory()->fixed()->create(['invoice_id' => $invoice->id, 'project_id' => $project->id]);
+
+        expect($project->hoursUsed())->toBe(0.0);
+    });
+
+    it('limits preloaded hours to a date range using entry and line dates', function () {
+        $project = Project::factory()->create();
+        TimeEntry::factory()->forProject($project)->create(['hours' => 3, 'date' => '2026-09-10']);
+        TimeEntry::factory()->forProject($project)->create(['hours' => 7, 'date' => '2026-08-10']);
+        ($this->projectInvoiceLine)($project, ['hours' => 0.5, 'date' => '2026-09-12']);
+        ($this->projectInvoiceLine)($project, ['hours' => 4, 'date' => '2026-08-12']);
+
+        $loaded = Project::query()
+            ->withHours('hours_in_range', '2026-09-01', '2026-09-30')
+            ->find($project->id);
+
+        expect($loaded->preloadedHours('hours_in_range'))->toBe(3.5);
     });
 
     it('returns null hours remaining without a budget', function () {
@@ -116,6 +168,41 @@ describe('Project options for a client', function () {
         Project::factory()->create();
 
         expect(Project::optionsForClient(null))->toBe([]);
+    });
+});
+
+describe('Changing an invoice line project', function () {
+    it('moves the time entries behind the line to the new project', function () {
+        $old = Project::factory()->create();
+        $new = Project::factory()->create(['client_id' => $old->client_id]);
+        $line = ($this->projectInvoiceLine)($old, ['hours' => 3]);
+        $entry = TimeEntry::factory()->forProject($old)->create(['hours' => 3, 'invoice_line_id' => $line->id]);
+
+        $line->update(['project_id' => $new->id]);
+
+        expect($entry->fresh()->project_id)->toBe($new->id)
+            ->and($old->hoursUsed())->toBe(0.0)
+            ->and($new->hoursUsed())->toBe(3.0);
+    });
+
+    it('clears the project on the time entries when the line project is cleared', function () {
+        $project = Project::factory()->create();
+        $line = ($this->projectInvoiceLine)($project, ['hours' => 2]);
+        $entry = TimeEntry::factory()->forProject($project)->create(['hours' => 2, 'invoice_line_id' => $line->id]);
+
+        $line->update(['project_id' => null]);
+
+        expect($entry->fresh()->project_id)->toBeNull();
+    });
+
+    it('leaves time entries alone when other line fields change', function () {
+        $project = Project::factory()->create();
+        $line = ($this->projectInvoiceLine)($project, ['hours' => 2]);
+        $entry = TimeEntry::factory()->forProject($project)->create(['hours' => 2, 'invoice_line_id' => $line->id]);
+
+        $line->update(['description' => 'Renamed']);
+
+        expect($entry->fresh()->project_id)->toBe($project->id);
     });
 });
 

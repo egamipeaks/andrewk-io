@@ -18,7 +18,7 @@ class ProjectsTable
         return $table
             ->modifyQueryUsing(fn (Builder $query): Builder => $query
                 ->with('client')
-                ->withSum('timeEntries as hours_used', 'hours'))
+                ->withHours())
             ->defaultSort('name')
             ->columns([
                 Tables\Columns\TextColumn::make('client.name')
@@ -37,7 +37,8 @@ class ProjectsTable
                     ->label('Used')
                     ->state(fn (Project $record): float => $record->hoursUsed())
                     ->numeric(decimalPlaces: 2)
-                    ->sortable(),
+                    ->sortable(query: fn (Builder $query, string $direction): Builder => $query
+                        ->orderByRaw("COALESCE(hours_used_from_entries, 0) + COALESCE(hours_used_from_lines, 0) {$direction}")),
                 Tables\Columns\TextColumn::make('hours_remaining')
                     ->label('Left')
                     ->state(fn (Project $record): ?float => $record->hoursRemaining())
@@ -86,17 +87,13 @@ class ProjectsTable
             return $query;
         }
 
-        return $query->withSum([
-            'timeEntries as hours_in_range' => fn (Builder $entries) => $entries
-                ->when($from, fn (Builder $entries, string $from) => $entries->whereDate('date', '>=', $from))
-                ->when($until, fn (Builder $entries, string $until) => $entries->whereDate('date', '<=', $until)),
-        ], 'hours');
+        return $query->withHours('hours_in_range', $from, $until);
     }
 
     protected static function hoursInRange(Project $record): float
     {
-        if (array_key_exists('hours_in_range', $record->getAttributes())) {
-            return (float) $record->getAttributes()['hours_in_range'];
+        if ($record->hasPreloadedHours('hours_in_range')) {
+            return $record->preloadedHours('hours_in_range');
         }
 
         return $record->hoursUsed();

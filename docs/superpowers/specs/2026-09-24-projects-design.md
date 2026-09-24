@@ -51,11 +51,13 @@ A time entry's project must belong to the entry's client. The same applies to an
 
 ### Hours Calculations
 
-- Hours used: sum of `time_entries.hours` for the project, all time.
+- Hours used: sum of `time_entries.hours` for the project, plus `hours` on the project's hourly invoice lines that have no time entries behind them (lines typed directly onto an invoice). Lines created from time entries are skipped so their hours are not counted twice. All time.
 - Hours left: `budget_hours` minus hours used. Null when there is no budget. Can be negative.
-- Hours in range: sum of `time_entries.hours` for the project where `date` is within the selected range. Equals hours used when no range is set.
+- Hours in range: the same two sums, limited to entries and lines whose `date` is within the selected range. Equals hours used when no range is set.
 
-Computed in the table query with `withSum` so there is no N+1.
+Computed in the table query with `withSum` (the `Project::withHours` scope) so there is no N+1.
+
+Changing an invoice line's project also moves the time entries behind that line to the new project, so the email grouping and the project totals agree.
 
 ## Admin UI
 
