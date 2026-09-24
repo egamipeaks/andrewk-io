@@ -33,6 +33,8 @@ class TimeTrackingPage extends Page
 
     public ?string $currentEditDate = null;
 
+    public ?int $currentEditClientId = null;
+
     public function mount(): void
     {
         $this->initializeMonth();

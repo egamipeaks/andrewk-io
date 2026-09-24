@@ -30,6 +30,7 @@ class EditCellActionBuilder
     protected function fillForm(array $arguments): array
     {
         $this->page->currentEditDate = $arguments['date'];
+        $this->page->currentEditClientId = (int) $arguments['clientId'];
 
         return ['entries' => $this->getFormEntries($arguments)];
     }
@@ -43,6 +44,7 @@ class EditCellActionBuilder
             'id' => $entry['id'],
             'description' => $entry['description'],
             'hours' => $entry['hours'],
+            'project_id' => $entry['project_id'] ?? null,
             'is_billed' => $entry['is_billed'],
             'invoice_line_id' => $entry['invoice_line_id'] ?? null,
         ])->toArray();
@@ -52,6 +54,7 @@ class EditCellActionBuilder
                 [
                     'description' => '',
                     'hours' => 1,
+                    'project_id' => null,
                     'is_billed' => false,
                 ],
             ];

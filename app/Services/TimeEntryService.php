@@ -39,11 +39,12 @@ class TimeEntryService
 
                 $entryId = $entryData['id'] ?? null;
                 $hours = $entryData['hours'] ?? 0;
+                $projectId = filled($entryData['project_id'] ?? null) ? (int) $entryData['project_id'] : null;
 
                 if ($entryId !== null) {
-                    $processedIds[] = $this->updateEntry($entryId, $description, $hours);
+                    $processedIds[] = $this->updateEntry($entryId, $description, $hours, $projectId);
                 } else {
-                    $processedIds[] = $this->createEntry($clientId, $date, $description, $hours);
+                    $processedIds[] = $this->createEntry($clientId, $date, $description, $hours, $projectId);
                 }
             }
 
@@ -51,7 +52,7 @@ class TimeEntryService
         });
     }
 
-    protected function updateEntry(int $id, string $description, float $hours): int
+    protected function updateEntry(int $id, string $description, float $hours, ?int $projectId): int
     {
         $entry = TimeEntry::find($id);
 
@@ -59,16 +60,18 @@ class TimeEntryService
             $entry->update([
                 'description' => $description,
                 'hours' => $hours,
+                'project_id' => $projectId,
             ]);
         }
 
         return $id;
     }
 
-    protected function createEntry(int $clientId, string $date, string $description, float $hours): int
+    protected function createEntry(int $clientId, string $date, string $description, float $hours, ?int $projectId): int
     {
         return TimeEntry::create([
             'client_id' => $clientId,
+            'project_id' => $projectId,
             'date' => $date,
             'description' => $description,
             'hours' => $hours,

@@ -96,6 +96,7 @@ it('can open the edit cell modal with existing entries', function () {
                     'id' => $entry->id,
                     'description' => 'Existing work',
                     'hours' => 5.0,
+                    'project_id' => null,
                     'is_billed' => false,
                     'invoice_line_id' => null,
                 ],

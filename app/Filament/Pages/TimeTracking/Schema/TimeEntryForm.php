@@ -3,10 +3,12 @@
 namespace App\Filament\Pages\TimeTracking\Schema;
 
 use App\Filament\Pages\TimeTracking\TimeTrackingPage;
+use App\Models\Project;
 use App\Models\TimeEntry;
 use Carbon\Carbon;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Repeater\TableColumn;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Utilities\Get;
@@ -36,6 +38,7 @@ class TimeEntryForm
                 ->table([
                     TableColumn::make('Hours'),
                     TableColumn::make('Description'),
+                    TableColumn::make('Project'),
                     TableColumn::make('Billed'),
                 ])
                 ->schema([
@@ -52,6 +55,14 @@ class TimeEntryForm
                         ->label('Description')
                         ->placeholder($placeholder)
                         ->maxLength(1000)
+                        ->disabled(fn (Get $get): bool => $get('is_billed') ?? false),
+                    Select::make('project_id')
+                        ->label('Project')
+                        ->placeholder('No project')
+                        ->options(fn (Get $get): array => Project::optionsForClient(
+                            $this->page->currentEditClientId,
+                            blank($get('project_id')) ? null : (int) $get('project_id'),
+                        ))
                         ->disabled(fn (Get $get): bool => $get('is_billed') ?? false),
                     TextEntry::make('billed')
                         ->hiddenLabel()
