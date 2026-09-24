@@ -22,15 +22,12 @@ beforeEach(function () {
     $this->client = Client::factory()->create(['hourly_rate' => 150]);
     $this->invoice = Invoice::factory()->create(['client_id' => $this->client->id, 'paid' => false]);
     $this->project = Project::factory()->create(['client_id' => $this->client->id, 'name' => 'Website Redesign']);
-});
 
-function invoiceLinesManager(Invoice $invoice, User $admin)
-{
-    return Livewire::actingAs($admin)->test(InvoiceLinesRelationManager::class, [
+    $this->linesManager = fn (Invoice $invoice, User $admin) => Livewire::actingAs($admin)->test(InvoiceLinesRelationManager::class, [
         'ownerRecord' => $invoice,
         'pageClass' => EditInvoice::class,
     ]);
-}
+});
 
 describe('Importing time entries', function () {
     it('copies the project onto the invoice line', function () {
@@ -52,7 +49,7 @@ describe('Importing time entries', function () {
 
 describe('Invoice line project field', function () {
     it('creates a manual line with a project', function () {
-        invoiceLinesManager($this->invoice, $this->admin)
+        ($this->linesManager)($this->invoice, $this->admin)
             ->callTableAction('create', data: [
                 'type' => InvoiceLineType::Fixed->value,
                 'project_id' => $this->project->id,
@@ -75,7 +72,7 @@ describe('Invoice line project field', function () {
             'project_id' => $this->project->id,
         ]);
 
-        invoiceLinesManager($this->invoice, $this->admin)
+        ($this->linesManager)($this->invoice, $this->admin)
             ->assertSee('Website Redesign');
     });
 });
@@ -89,7 +86,7 @@ describe('Merging hourly lines', function () {
             'hours' => 2,
         ]);
 
-        invoiceLinesManager($this->invoice, $this->admin)
+        ($this->linesManager)($this->invoice, $this->admin)
             ->callTableBulkAction('mergeHourlyLines', $lines)
             ->assertNotified('Lines Merged Successfully');
 
@@ -104,7 +101,7 @@ describe('Merging hourly lines', function () {
         $a = InvoiceLine::factory()->hourly()->create(['invoice_id' => $this->invoice->id, 'project_id' => $this->project->id, 'hourly_rate' => 150]);
         $b = InvoiceLine::factory()->hourly()->create(['invoice_id' => $this->invoice->id, 'project_id' => $otherProject->id, 'hourly_rate' => 150]);
 
-        invoiceLinesManager($this->invoice, $this->admin)
+        ($this->linesManager)($this->invoice, $this->admin)
             ->callTableBulkAction('mergeHourlyLines', [$a, $b])
             ->assertNotified('Cannot Merge');
 
@@ -115,7 +112,7 @@ describe('Merging hourly lines', function () {
         $a = InvoiceLine::factory()->hourly()->create(['invoice_id' => $this->invoice->id, 'project_id' => $this->project->id, 'hourly_rate' => 150]);
         $b = InvoiceLine::factory()->hourly()->create(['invoice_id' => $this->invoice->id, 'project_id' => null, 'hourly_rate' => 150]);
 
-        invoiceLinesManager($this->invoice, $this->admin)
+        ($this->linesManager)($this->invoice, $this->admin)
             ->callTableBulkAction('mergeHourlyLines', [$a, $b])
             ->assertNotified('Cannot Merge');
 

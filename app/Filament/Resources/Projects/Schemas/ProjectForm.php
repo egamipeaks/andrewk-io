@@ -33,7 +33,7 @@ class ProjectForm
                 ->label('Budget')
                 ->numeric()
                 ->minValue(0)
-                ->step(0.5)
+                ->step(0.25)
                 ->suffix('hrs')
                 ->helperText('Leave blank for no budget.'),
             Forms\Components\Toggle::make('is_active')

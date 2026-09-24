@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Invoices\Schemas;
 
 use App\Enums\Currency;
 use App\Models\Client;
+use App\Models\Invoice;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -35,7 +36,11 @@ class InvoiceForm
                         $currency = $client->currency;
                         $set('currency', $currency->value);
                         $set('conversion_rate', $currency->fromUsdRate());
-                    }),
+                    })
+                    ->disabled(fn (?Invoice $record): bool => $record?->hasProjectLines() ?? false)
+                    ->helperText(fn (?Invoice $record): ?string => $record?->hasProjectLines()
+                        ? 'Locked because this invoice has lines tagged with a project.'
+                        : null),
                 Select::make('currency')
                     ->options(Currency::class)
                     ->live()

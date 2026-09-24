@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Mail;
+use InvalidArgumentException;
 
 class Invoice extends Model
 {
@@ -33,6 +34,21 @@ class Invoice extends Model
     protected $attributes = [
         'currency' => 'USD',
     ];
+
+    protected static function booted(): void
+    {
+        static::updating(function (Invoice $invoice): void {
+            if (! $invoice->isDirty('client_id')) {
+                return;
+            }
+
+            if (! $invoice->hasProjectLines()) {
+                return;
+            }
+
+            throw new InvalidArgumentException("Invoice {$invoice->id} has project lines and cannot change client.");
+        });
+    }
 
     public function client()
     {

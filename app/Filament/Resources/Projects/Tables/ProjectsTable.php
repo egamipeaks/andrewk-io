@@ -31,23 +31,23 @@ class ProjectsTable
                     ->sortable(),
                 Tables\Columns\TextColumn::make('budget_hours')
                     ->label('Budget')
-                    ->numeric(decimalPlaces: 1)
+                    ->numeric(decimalPlaces: 2)
                     ->placeholder('—'),
                 Tables\Columns\TextColumn::make('hours_used')
                     ->label('Used')
                     ->state(fn (Project $record): float => $record->hoursUsed())
-                    ->numeric(decimalPlaces: 1)
+                    ->numeric(decimalPlaces: 2)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('hours_remaining')
                     ->label('Left')
                     ->state(fn (Project $record): ?float => $record->hoursRemaining())
-                    ->numeric(decimalPlaces: 1)
+                    ->numeric(decimalPlaces: 2)
                     ->color(fn (?float $state): ?string => $state !== null && $state < 0 ? 'danger' : null)
                     ->placeholder('—'),
                 Tables\Columns\TextColumn::make('hours_in_range')
                     ->label('In range')
                     ->state(fn (Project $record): float => self::hoursInRange($record))
-                    ->numeric(decimalPlaces: 1),
+                    ->numeric(decimalPlaces: 2),
                 Tables\Columns\IconColumn::make('is_active')
                     ->label('Active')
                     ->boolean(),
