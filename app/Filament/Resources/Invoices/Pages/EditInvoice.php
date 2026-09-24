@@ -132,6 +132,7 @@ class EditInvoice extends EditRecord
         foreach ($timeEntries as $entry) {
             $invoiceLine = $this->record->invoiceLines()->create([
                 'type' => InvoiceLineType::Hourly,
+                'project_id' => $entry->project_id,
                 'description' => $entry->description,
                 'date' => $entry->date,
                 'hourly_rate' => $this->record->client->hourly_rate,

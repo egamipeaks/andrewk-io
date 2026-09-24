@@ -50,6 +50,12 @@ class InvoiceLinesRelationManager extends RelationManager
                     ->required()
                     ->live()
                     ->columnSpanFull(),
+                Forms\Components\Select::make('project_id')
+                    ->label('Project')
+                    ->placeholder('No project')
+                    ->options(fn (): array => $this->getOwnerRecord()->client->projects()->orderBy('name')->pluck('name', 'id')->all())
+                    ->searchable()
+                    ->columnSpanFull(),
                 Forms\Components\Textarea::make('description')
                     ->required()
                     ->columnSpanFull()
@@ -113,6 +119,10 @@ class InvoiceLinesRelationManager extends RelationManager
 
                         return $count === 1 ? 'Time Entry' : "{$count} Time Entries";
                     })
+                    ->placeholder('—')
+                    ->toggleable(),
+                Tables\Columns\TextColumn::make('project.name')
+                    ->label('Project')
                     ->placeholder('—')
                     ->toggleable(),
                 Tables\Columns\TextColumn::make('date')
@@ -232,6 +242,18 @@ class InvoiceLinesRelationManager extends RelationManager
             return;
         }
 
+        if ($hourlyLines->pluck('project_id')->unique()->count() > 1) {
+            Notification::make()
+                ->title('Cannot Merge')
+                ->body('The selected lines belong to different projects. Merge one project at a time.')
+                ->warning()
+                ->send();
+
+            return;
+        }
+
+        $projectId = $hourlyLines->first()->project_id;
+
         $invoice = $this->getOwnerRecord();
         $rateGroups = $hourlyLines->groupBy('hourly_rate');
         $mergedLinesCreated = 0;
@@ -245,6 +267,7 @@ class InvoiceLinesRelationManager extends RelationManager
 
             $mergedLine = $invoice->invoiceLines()->create([
                 'type' => InvoiceLineType::Hourly,
+                'project_id' => $projectId,
                 'description' => "Hours for {$monthName} (at {$rate}/hr)",
                 'date' => $firstOfMonth,
                 'hourly_rate' => $rate,
