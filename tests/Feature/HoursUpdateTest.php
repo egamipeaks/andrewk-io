@@ -5,6 +5,7 @@ use App\Enums\HoursUpdateFrequency;
 use App\Filament\Resources\Clients\Pages\EditClient;
 use App\Mail\HoursUpdateEmail;
 use App\Models\Client;
+use App\Models\HoursUpdateSend;
 use App\Models\Project;
 use App\Models\TimeEntry;
 use App\Models\User;
@@ -142,10 +143,58 @@ describe('send-hours-updates command', function () {
         Client::factory()->create(['hours_update_frequency' => HoursUpdateFrequency::Weekly]);
 
         artisan('send-hours-updates')
-            ->expectsOutputToContain('Sent 0 of 1 due hours updates.')
+            ->expectsOutputToContain('Sent 0 of 1 due hours updates, 0 failed.')
             ->assertSuccessful();
 
         Mail::assertNothingSent();
+    });
+});
+
+describe('send-hours-updates command resilience', function () {
+    beforeEach(function () {
+        travelTo(Carbon::parse('2026-10-12 09:00', 'America/Chicago'));
+    });
+
+    it('keeps sending to other clients when one send fails', function () {
+        $broken = Client::factory()->create(['email' => 'broken@example.com', 'hours_update_frequency' => HoursUpdateFrequency::Weekly]);
+        $working = Client::factory()->create(['email' => 'ok@example.com', 'hours_update_frequency' => HoursUpdateFrequency::Weekly]);
+        TimeEntry::factory()->create(['client_id' => $broken->id, 'date' => '2026-10-05']);
+        TimeEntry::factory()->create(['client_id' => $working->id, 'date' => '2026-10-05']);
+
+        HoursUpdateSend::creating(function (HoursUpdateSend $send): void {
+            if ($send->email === 'broken@example.com') {
+                throw new RuntimeException('Mail provider unavailable');
+            }
+        });
+
+        artisan('send-hours-updates')
+            ->expectsOutputToContain('Failed: Mail provider unavailable')
+            ->expectsOutputToContain('Sent 1 of 2 due hours updates, 1 failed.')
+            ->assertFailed();
+
+        assertDatabaseHas('hours_update_sends', ['client_id' => $working->id]);
+    });
+
+    it('does not send twice on the same day', function () {
+        $client = Client::factory()->create(['hours_update_frequency' => HoursUpdateFrequency::Weekly]);
+        TimeEntry::factory()->create(['client_id' => $client->id, 'date' => '2026-10-05']);
+
+        artisan('send-hours-updates')->assertSuccessful();
+        artisan('send-hours-updates')
+            ->expectsOutputToContain('Skipped, already sent today.')
+            ->assertSuccessful();
+
+        Mail::assertSentCount(1);
+    });
+
+    it('still sends when the last update was on an earlier day', function () {
+        $client = Client::factory()->create(['hours_update_frequency' => HoursUpdateFrequency::Weekly]);
+        TimeEntry::factory()->create(['client_id' => $client->id, 'date' => '2026-10-05']);
+        HoursUpdateSend::factory()->for($client)->create(['sent_at' => Carbon::parse('2026-10-11 23:30', 'America/Chicago')]);
+
+        artisan('send-hours-updates')->assertSuccessful();
+
+        Mail::assertSentCount(1);
     });
 });
 
@@ -177,6 +226,17 @@ describe('client admin', function () {
 
         Mail::assertSent(HoursUpdateEmail::class);
         assertDatabaseCount('hours_update_sends', 1);
+    });
+
+    it('cannot send an hours update without going through the action', function () {
+        TimeEntry::factory()->create(['client_id' => $this->client->id, 'date' => today('America/Chicago')]);
+
+        expect(fn () => Livewire::actingAs($this->admin)
+            ->test(EditClient::class, ['record' => $this->client->id])
+            ->call('sendHoursUpdate'))
+            ->toThrow(Exception::class);
+
+        Mail::assertNothingSent();
     });
 
     it('warns when there is nothing to send', function () {

@@ -31,7 +31,7 @@ class EditClient extends EditRecord
         ];
     }
 
-    public function sendHoursUpdate(): void
+    protected function sendHoursUpdate(): void
     {
         if (! $this->record->sendHoursUpdate(today('America/Chicago'))) {
             Notification::make()

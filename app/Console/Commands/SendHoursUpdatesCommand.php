@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Enums\HoursUpdateFrequency;
 use App\Models\Client;
 use Illuminate\Console\Command;
+use Throwable;
 
 class SendHoursUpdatesCommand extends Command
 {
@@ -12,7 +13,7 @@ class SendHoursUpdatesCommand extends Command
 
     protected $description = 'Email clients an update of un-invoiced hours worked this month';
 
-    public function handle(): void
+    public function handle(): int
     {
         $today = today('America/Chicago');
 
@@ -23,19 +24,38 @@ class SendHoursUpdatesCommand extends Command
             ->filter(fn (Client $client): bool => $client->hours_update_frequency->isDueOn($today));
 
         $sentCount = 0;
+        $failedCount = 0;
 
-        $clients->each(function (Client $client) use ($today, &$sentCount): void {
+        foreach ($clients as $client) {
             $this->info("Sending hours update to `{$client->name}`...");
 
-            if (! $client->sendHoursUpdate($today)) {
+            if ($client->hoursUpdateSends()->where('sent_at', '>=', $today->copy()->utc())->exists()) {
+                $this->comment('Skipped, already sent today.');
+
+                continue;
+            }
+
+            try {
+                $sent = $client->sendHoursUpdate($today);
+            } catch (Throwable $exception) {
+                report($exception);
+                $this->error("Failed: {$exception->getMessage()}");
+                $failedCount++;
+
+                continue;
+            }
+
+            if (! $sent) {
                 $this->comment('Skipped, no un-invoiced hours this month.');
 
-                return;
+                continue;
             }
 
             $sentCount++;
-        });
+        }
 
-        $this->comment("Sent {$sentCount} of {$clients->count()} due hours updates.");
+        $this->comment("Sent {$sentCount} of {$clients->count()} due hours updates, {$failedCount} failed.");
+
+        return $failedCount > 0 ? self::FAILURE : self::SUCCESS;
     }
 }
