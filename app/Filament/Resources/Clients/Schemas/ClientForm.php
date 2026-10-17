@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Clients\Schemas;
 
 use App\Enums\Currency;
+use App\Enums\HoursUpdateFrequency;
 use Filament\Forms;
 use Filament\Schemas\Schema;
 
@@ -41,6 +42,12 @@ class ClientForm
                 ->default(true)
                 ->inline(false)
                 ->helperText('Inactive clients won\'t appear on the Time Tracking page.'),
+            Forms\Components\Select::make('hours_update_frequency')
+                ->label('Hours Update Email')
+                ->options(HoursUpdateFrequency::class)
+                ->default(HoursUpdateFrequency::Off)
+                ->required()
+                ->helperText('Automatically emails un-invoiced hours for the month at 9am Chicago time. Not a bill.'),
         ];
 
         return $schema->components($components);
