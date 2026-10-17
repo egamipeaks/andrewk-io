@@ -3,10 +3,11 @@
 namespace Database\Factories;
 
 use App\Models\Client;
+use App\Models\HoursUpdateSend;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\HoursUpdateSend>
+ * @extends Factory<HoursUpdateSend>
  */
 class HoursUpdateSendFactory extends Factory
 {

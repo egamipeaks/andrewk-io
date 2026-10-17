@@ -4,6 +4,7 @@ use App\Models\Client;
 use App\Models\Invoice;
 use App\Models\InvoiceLine;
 use App\Models\TimeEntry;
+use Illuminate\Support\Carbon;
 
 describe('TimeEntry Model', function () {
     it('has correct fillable attributes', function () {
@@ -23,7 +24,7 @@ describe('TimeEntry Model', function () {
             'date' => '2025-01-15',
         ]);
 
-        expect($timeEntry->date)->toBeInstanceOf(\Illuminate\Support\Carbon::class);
+        expect($timeEntry->date)->toBeInstanceOf(Carbon::class);
     });
 
     it('casts hours as decimal', function () {

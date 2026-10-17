@@ -3,10 +3,11 @@
 namespace Database\Factories;
 
 use App\Models\Client;
+use App\Models\ProjectedEntry;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\ProjectedEntry>
+ * @extends Factory<ProjectedEntry>
  */
 class ProjectedEntryFactory extends Factory
 {

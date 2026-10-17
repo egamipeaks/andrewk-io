@@ -5,10 +5,11 @@ namespace Database\Factories;
 use App\Models\Client;
 use App\Models\InvoiceLine;
 use App\Models\Project;
+use App\Models\TimeEntry;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\TimeEntry>
+ * @extends Factory<TimeEntry>
  */
 class TimeEntryFactory extends Factory
 {

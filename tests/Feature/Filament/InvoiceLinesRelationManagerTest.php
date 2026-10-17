@@ -6,6 +6,7 @@ use App\Filament\Resources\Invoices\RelationManagers\InvoiceLinesRelationManager
 use App\Models\Client;
 use App\Models\Invoice;
 use App\Models\InvoiceLine;
+use App\Models\TimeEntry;
 use App\Models\User;
 use Livewire\Livewire;
 
@@ -207,7 +208,7 @@ describe('InvoiceLinesRelationManager Delete', function () {
 
     it('shows confirmation when deleting invoice line with time entries', function () {
         $line = InvoiceLine::factory()->hourly()->create(['invoice_id' => $this->invoice->id]);
-        $entry = \App\Models\TimeEntry::factory()->create([
+        $entry = TimeEntry::factory()->create([
             'client_id' => $this->client->id,
             'invoice_line_id' => $line->id,
         ]);
@@ -224,7 +225,7 @@ describe('InvoiceLinesRelationManager Delete', function () {
 
     it('unlinks time entries when deleting invoice line', function () {
         $line = InvoiceLine::factory()->hourly()->create(['invoice_id' => $this->invoice->id]);
-        $entry = \App\Models\TimeEntry::factory()->create([
+        $entry = TimeEntry::factory()->create([
             'client_id' => $this->client->id,
             'invoice_line_id' => $line->id,
         ]);
@@ -247,7 +248,7 @@ describe('InvoiceLinesRelationManager Delete', function () {
 describe('InvoiceLinesRelationManager Visual Indicators', function () {
     it('shows time entry badge when invoice line has linked time entries', function () {
         $line = InvoiceLine::factory()->hourly()->create(['invoice_id' => $this->invoice->id]);
-        \App\Models\TimeEntry::factory()->create([
+        TimeEntry::factory()->create([
             'client_id' => $this->client->id,
             'invoice_line_id' => $line->id,
         ]);
@@ -262,7 +263,7 @@ describe('InvoiceLinesRelationManager Visual Indicators', function () {
 
     it('shows warning when editing invoice line with time entries', function () {
         $line = InvoiceLine::factory()->hourly()->create(['invoice_id' => $this->invoice->id]);
-        \App\Models\TimeEntry::factory()->count(2)->create([
+        TimeEntry::factory()->count(2)->create([
             'client_id' => $this->client->id,
             'invoice_line_id' => $line->id,
         ]);
@@ -281,7 +282,7 @@ describe('InvoiceLinesRelationManager Visual Indicators', function () {
 
     it('can filter by has time entries', function () {
         $lineWithEntry = InvoiceLine::factory()->hourly()->create(['invoice_id' => $this->invoice->id]);
-        \App\Models\TimeEntry::factory()->create([
+        TimeEntry::factory()->create([
             'client_id' => $this->client->id,
             'invoice_line_id' => $lineWithEntry->id,
         ]);
@@ -300,7 +301,7 @@ describe('InvoiceLinesRelationManager Visual Indicators', function () {
 
     it('can filter by does not have time entries', function () {
         $lineWithEntry = InvoiceLine::factory()->hourly()->create(['invoice_id' => $this->invoice->id]);
-        \App\Models\TimeEntry::factory()->create([
+        TimeEntry::factory()->create([
             'client_id' => $this->client->id,
             'invoice_line_id' => $lineWithEntry->id,
         ]);
@@ -319,7 +320,7 @@ describe('InvoiceLinesRelationManager Visual Indicators', function () {
 
     it('shows view source entries action when invoice line has time entries', function () {
         $line = InvoiceLine::factory()->hourly()->create(['invoice_id' => $this->invoice->id]);
-        \App\Models\TimeEntry::factory()->create([
+        TimeEntry::factory()->create([
             'client_id' => $this->client->id,
             'invoice_line_id' => $line->id,
         ]);

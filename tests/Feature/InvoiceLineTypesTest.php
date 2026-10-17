@@ -3,6 +3,7 @@
 use App\Enums\InvoiceLineType;
 use App\Models\Invoice;
 use App\Models\InvoiceLine;
+use Illuminate\Support\Carbon;
 
 describe('InvoiceLine with Fixed Type', function () {
     it('calculates subtotal using amount', function () {
@@ -76,7 +77,7 @@ describe('InvoiceLine Date Field', function () {
             'date' => '2025-01-15',
         ]);
 
-        expect($invoiceLine->date)->toBeInstanceOf(\Illuminate\Support\Carbon::class)
+        expect($invoiceLine->date)->toBeInstanceOf(Carbon::class)
             ->and($invoiceLine->date->format('Y-m-d'))->toBe('2025-01-15');
     });
 
