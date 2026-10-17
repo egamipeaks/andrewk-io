@@ -4,11 +4,12 @@ namespace Database\Factories;
 
 use App\Enums\InvoiceLineType;
 use App\Models\Invoice;
+use App\Models\InvoiceLine;
 use App\Models\TimeEntry;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\InvoiceLine>
+ * @extends Factory<InvoiceLine>
  */
 class InvoiceLineFactory extends Factory
 {

@@ -5,6 +5,7 @@ use App\Models\Client;
 use App\Models\Invoice;
 use App\Models\InvoiceLine;
 use App\Models\User;
+use Filament\Panel;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
@@ -164,7 +165,7 @@ describe('User Permission Methods', function () {
 
     it('correctly identifies users who can access Filament panel', function () {
         // We need to mock the Panel instance for this test
-        $panel = Mockery::mock(\Filament\Panel::class);
+        $panel = Mockery::mock(Panel::class);
 
         expect($this->admin->canAccessPanel($panel))->toBeTrue();
         expect($this->regularUser->canAccessPanel($panel))->toBeFalse();

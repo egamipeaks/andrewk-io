@@ -61,7 +61,7 @@ describe('ProjectedEntry Model', function () {
             'client_id' => $this->client->id,
             'date' => now(),
             'hours' => 3,
-        ]))->toThrow(\Exception::class);
+        ]))->toThrow(Exception::class);
     });
 
     it('has factory states for different months', function () {

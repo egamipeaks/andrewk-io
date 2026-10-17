@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\ProjectedEntryFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ProjectedEntry extends Model
 {
-    /** @use HasFactory<\Database\Factories\ProjectedEntryFactory> */
+    /** @use HasFactory<ProjectedEntryFactory> */
     use HasFactory;
 
     protected $fillable = [

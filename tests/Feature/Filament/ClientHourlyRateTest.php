@@ -3,6 +3,7 @@
 use App\Filament\Resources\Clients\Pages\CreateClient;
 use App\Filament\Resources\Clients\Pages\EditClient;
 use App\Filament\Resources\Clients\Pages\ListClients;
+use App\Filament\Resources\Invoices\Pages\EditInvoice;
 use App\Filament\Resources\Invoices\RelationManagers\InvoiceLinesRelationManager;
 use App\Models\Client;
 use App\Models\Invoice;
@@ -110,7 +111,7 @@ describe('Invoice Line Management', function () {
         Livewire::actingAs($this->admin)
             ->test(InvoiceLinesRelationManager::class, [
                 'ownerRecord' => $invoice,
-                'pageClass' => \App\Filament\Resources\Invoices\Pages\EditInvoice::class,
+                'pageClass' => EditInvoice::class,
             ])
             ->assertOk();
     });
