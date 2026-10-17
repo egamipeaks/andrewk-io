@@ -80,6 +80,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $schedule->command('backup:run')->daily();
         $schedule->command('backup:clean')->daily();
         $schedule->command('backup:monitor')->weekly();
+        $schedule->command('send-hours-updates')->dailyAt('09:00')->timezone('America/Chicago');
     })
     ->withCommands([
         __DIR__.'/../app/Console/Commands',

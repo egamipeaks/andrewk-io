@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\HoursUpdateEmailPreviewController;
 use App\Http\Controllers\InvoiceEmailPreviewController;
 use Illuminate\Support\Facades\Route;
 
@@ -30,3 +31,6 @@ Route::middleware('page-cache')->group(function () {
 // Invoice email preview route
 Route::get('/invoice/{invoice}/email-preview', [InvoiceEmailPreviewController::class, 'preview'])
     ->name('invoice.email.preview');
+
+Route::get('/client/{client}/hours-update-preview', [HoursUpdateEmailPreviewController::class, 'preview'])
+    ->name('client.hours-update.preview');
