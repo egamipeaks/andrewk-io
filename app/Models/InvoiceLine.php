@@ -150,6 +150,18 @@ class InvoiceLine extends Model
         return "{$formatted} hrs";
     }
 
+    public static function formatHoursAsDecimal(float $hours): string
+    {
+        $hasHundredths = fmod(round($hours * 100), 10) != 0;
+
+        return number_format($hours, $hasHundredths ? 2 : 1);
+    }
+
+    public function isHourly(): bool
+    {
+        return $this->hourly_rate !== null && $this->hours !== null;
+    }
+
     public function formattedHours(): string
     {
         return self::formatHours((float) $this->hours);

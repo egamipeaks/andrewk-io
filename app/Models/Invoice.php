@@ -136,7 +136,7 @@ class Invoice extends Model
                 return [
                     'name' => $lines->first()->project?->name ?? 'Other',
                     'lines' => $lines->values(),
-                    'formattedHours' => $hours > 0 ? InvoiceLine::formatHours($hours) : null,
+                    'formattedHours' => $hours > 0 ? InvoiceLine::formatHoursAsDecimal($hours) : null,
                     'formattedSubtotal' => $currency->format($subtotal),
                 ];
             });
@@ -145,6 +145,45 @@ class Invoice extends Model
             ->sortBy('name')
             ->concat($groups->only(0))
             ->values();
+    }
+
+    public function formattedSharedHourlyRate(): ?string
+    {
+        $hourlyLines = $this->invoiceLines->filter(fn (InvoiceLine $line): bool => $line->isHourly());
+
+        if ($hourlyLines->isEmpty()) {
+            return null;
+        }
+
+        $rates = $hourlyLines->map(fn (InvoiceLine $line): float => $line->hourlyRateInClientCurrency())->unique();
+
+        if ($rates->count() > 1) {
+            return null;
+        }
+
+        return $hourlyLines->first()->formattedHourlyRate();
+    }
+
+    public function formattedBillingPeriod(): ?string
+    {
+        $dates = $this->invoiceLines->pluck('date')->filter();
+
+        if ($dates->isEmpty()) {
+            return null;
+        }
+
+        $start = $dates->min();
+        $end = $dates->max();
+
+        if ($start->isSameDay($end)) {
+            return $start->format('M j, Y');
+        }
+
+        if ($start->isSameYear($end)) {
+            return "{$start->format('M j')} – {$end->format('M j, Y')}";
+        }
+
+        return "{$start->format('M j, Y')} – {$end->format('M j, Y')}";
     }
 
     public function emailSends(): HasMany

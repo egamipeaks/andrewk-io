@@ -122,7 +122,6 @@ describe('Email Preview Content', function () {
             ->get(route('invoice.email.preview', $this->invoice));
 
         $response->assertOk()
-            ->assertSee('Note:')
             ->assertSee($this->invoice->note);
     });
 
@@ -131,9 +130,10 @@ describe('Email Preview Content', function () {
             ->get(route('invoice.email.preview', $this->invoice));
 
         $response->assertOk()
+            ->assertSee('Date')
             ->assertSee('Description')
-            ->assertSee('Rate')
-            ->assertSee('Total');
+            ->assertSee('Hours')
+            ->assertSee('Amount');
 
         // Check that invoice lines are displayed
         foreach ($this->invoice->invoiceLines as $line) {
@@ -142,17 +142,13 @@ describe('Email Preview Content', function () {
     });
 
     it('does not display note section when invoice has no note', function () {
-        $invoiceWithoutNote = Invoice::factory()->create([
-            'client_id' => $this->client->id,
-            'due_date' => now()->addDays(30),
-            'note' => null,
-        ]);
+        $this->invoice->update(['note' => null]);
 
         $response = actingAs($this->admin)
-            ->get(route('invoice.email.preview', $invoiceWithoutNote));
+            ->get(route('invoice.email.preview', $this->invoice));
 
         $response->assertOk()
-            ->assertDontSee('Note:');
+            ->assertDontSee('Test invoice note');
     });
 });
 
