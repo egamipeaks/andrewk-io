@@ -1,12 +1,15 @@
 <tr>
-    <td style="vertical-align: top; padding: 10px 0; {{ $isLast ? '' : 'border-bottom: 1px solid #f0f0f0;' }} font-size: 13px; color: #4a5568; line-height: 1.5;">{{ $line->description }}</td>
-    <td style="vertical-align: top; text-align: right; padding: 10px 16px 10px 8px; {{ $isLast ? '' : 'border-bottom: 1px solid #f0f0f0;' }} white-space: nowrap;">
-        @if($line->hourly_rate && $line->hours)
-            <span style="font-size: 13px; font-weight: 500; color: #4a5568;">{{ $line->formattedHourlyRate() }} / hr</span><br>
-            <span style="font-size: 11px; color: #a0aec0; line-height: 1.2;">{{ $line->formattedHours() }}</span>
-        @else
-            <span style="font-size: 13px; font-weight: 500; color: #4a5568;">{{ $line->formattedSubTotal() }}</span>
-        @endif
+    <td style="vertical-align: top; padding: 9px 8px 9px 0; border-bottom: 1px solid #e7e9f0; font-size: 13px; color: #8a91a6; line-height: 1.45; white-space: nowrap;">{{ $line->date?->format('M j') }}</td>
+    <td style="vertical-align: top; padding: 9px 12px 9px 0; border-bottom: 1px solid #e7e9f0; font-size: 13px; color: #4a5268; line-height: 1.45;">{{ $line->description }}</td>
+    <td style="vertical-align: top; padding: 9px 0; border-bottom: 1px solid #e7e9f0; text-align: right; font-size: 13px; color: #4a5268; line-height: 1.45; white-space: nowrap;">
+@if($line->isHourly())
+        {{ \App\Models\InvoiceLine::formatHoursAsDecimal((float) $line->hours) }}
+@if($showRate)
+        <br><span style="font-size: 11px; color: #8a91a6;">@ {{ $line->formattedHourlyRate() }}/hr</span>
+@endif
+@else
+        <span style="color: #8a91a6;">Fixed</span>
+@endif
     </td>
-    <td style="vertical-align: top; text-align: right; padding: 10px 0; {{ $isLast ? '' : 'border-bottom: 1px solid #f0f0f0;' }} font-size: 13px; font-weight: 600; color: #2d3748;">{{ $line->formattedSubTotal() }}</td>
+    <td style="vertical-align: top; padding: 9px 0; border-bottom: 1px solid #e7e9f0; text-align: right; font-size: 13px; font-weight: 600; color: #1d2233; line-height: 1.45; white-space: nowrap;">{{ $line->formattedSubTotal() }}</td>
 </tr>

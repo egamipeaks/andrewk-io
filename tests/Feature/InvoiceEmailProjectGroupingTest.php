@@ -24,6 +24,15 @@ describe('InvoiceLine hours formatting', function () {
         'whole hours' => [3.0, '3 hrs'],
         'fractional hours' => [2.5, '2.50 hrs'],
     ]);
+
+    it('formats hours as a decimal', function (float $hours, string $expected) {
+        expect(InvoiceLine::formatHoursAsDecimal($hours))->toBe($expected);
+    })->with([
+        'half hour' => [0.5, '0.5'],
+        'whole hours' => [3.0, '3.0'],
+        'quarter hour' => [0.25, '0.25'],
+        'large' => [1234.5, '1,234.5'],
+    ]);
 });
 
 describe('Invoice line grouping', function () {
@@ -51,7 +60,7 @@ describe('Invoice line grouping', function () {
 
         expect($groups->pluck('name')->all())->toBe(['Alpha', 'Zeta', 'Other'])
             ->and($groups[0]['lines'])->toHaveCount(2)
-            ->and($groups[0]['formattedHours'])->toBe('3 hrs')
+            ->and($groups[0]['formattedHours'])->toBe('3.0')
             ->and($groups[0]['formattedSubtotal'])->toBe($this->invoice->currency->format(350))
             ->and($groups[2]['formattedSubtotal'])->toBe($this->invoice->currency->format(100));
     });
@@ -74,7 +83,7 @@ describe('Invoice email rendering', function () {
 
         expect($html)
             ->toContain('Plain work')
-            ->not->toContain('Subtotal')
+            ->toContain('Total hours')
             ->not->toContain('Other')
             ->not->toContain('<pre>');
     });
@@ -87,9 +96,88 @@ describe('Invoice email rendering', function () {
         $html = (new InvoiceEmail($this->invoice->fresh()))->render();
 
         expect($html)
-            ->toMatch('/Website Redesign.*Header layout.*Subtotal.*Other.*Hosting support/s')
+            ->toMatch('/Website Redesign.*2\.0.*Header layout.*Other.*Hosting support.*Website Redesign · 2\.0 hrs.*Other · 1\.0 hrs.*Amount due/s')
             ->not->toContain('<pre>')
             ->not->toContain('37.25')
             ->not->toContain('Budget');
     });
+
+    it('shows the rate once in the header when every hourly line shares it', function () {
+        InvoiceLine::factory()->hourly()->count(2)->create(['invoice_id' => $this->invoice->id, 'hourly_rate' => 125, 'hours' => 2]);
+
+        $html = (new InvoiceEmail($this->invoice->fresh()))->render();
+
+        expect($html)
+            ->toContain('Hourly at $125 / hr')
+            ->not->toContain('/hr</span>');
+    });
+
+    it('shows the rate on each row when hourly rates differ', function () {
+        InvoiceLine::factory()->hourly()->create(['invoice_id' => $this->invoice->id, 'hourly_rate' => 125, 'hours' => 2]);
+        InvoiceLine::factory()->hourly()->create(['invoice_id' => $this->invoice->id, 'hourly_rate' => 150, 'hours' => 1]);
+
+        $html = (new InvoiceEmail($this->invoice->fresh()))->render();
+
+        expect($html)
+            ->not->toContain('Hourly at')
+            ->toContain('@ $125/hr')
+            ->toContain('@ $150/hr');
+    });
+
+    it('labels fixed lines and omits total hours for a fixed-only invoice', function () {
+        InvoiceLine::factory()->fixed()->create(['invoice_id' => $this->invoice->id, 'amount' => 500]);
+
+        $html = (new InvoiceEmail($this->invoice->fresh()))->render();
+
+        expect($html)
+            ->toContain('Fixed')
+            ->not->toContain('Hourly at')
+            ->not->toContain('Total hours');
+    });
+
+    it('shows the billing period from line dates', function () {
+        InvoiceLine::factory()->hourly()->create(['invoice_id' => $this->invoice->id, 'date' => '2026-09-23']);
+        InvoiceLine::factory()->hourly()->create(['invoice_id' => $this->invoice->id, 'date' => '2026-10-30']);
+
+        $html = (new InvoiceEmail($this->invoice->fresh()))->render();
+
+        expect($html)
+            ->toContain('Period')
+            ->toContain('Sep 23 – Oct 30, 2026')
+            ->toContain('Sep 23');
+    });
+
+    it('omits the billing period when no line has a date', function () {
+        InvoiceLine::factory()->hourly()->create(['invoice_id' => $this->invoice->id, 'date' => null]);
+
+        $html = (new InvoiceEmail($this->invoice->fresh()))->render();
+
+        expect($html)->not->toContain('Period');
+    });
+
+    it('renders the note as the intro with line breaks', function () {
+        $this->invoice->update(['note' => "Hi Kim,\nHere is October."]);
+        InvoiceLine::factory()->hourly()->create(['invoice_id' => $this->invoice->id]);
+
+        $html = (new InvoiceEmail($this->invoice->fresh()))->render();
+
+        expect($html)
+            ->toContain('Hi Kim,<br>')
+            ->not->toContain('Note:');
+    });
+});
+
+describe('Invoice billing period', function () {
+    it('formats the billing period', function (array $dates, ?string $expected) {
+        foreach ($dates as $date) {
+            InvoiceLine::factory()->hourly()->create(['invoice_id' => $this->invoice->id, 'date' => $date]);
+        }
+
+        expect($this->invoice->fresh()->formattedBillingPeriod())->toBe($expected);
+    })->with([
+        'single day' => [['2026-10-05'], 'Oct 5, 2026'],
+        'same year' => [['2026-10-30', '2026-09-23'], 'Sep 23 – Oct 30, 2026'],
+        'across years' => [['2025-12-28', '2026-01-04'], 'Dec 28, 2025 – Jan 4, 2026'],
+        'no dates' => [[null], null],
+    ]);
 });
